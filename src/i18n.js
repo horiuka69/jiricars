@@ -1,0 +1,270 @@
+import i18n from 'i18next';
+import { initReactI18next } from 'react-i18next';
+
+const resources = {
+  en: {
+    translation: {
+      "nav.home": "Home",
+      "nav.forum": "Forum",
+      "nav.blog": "Blog",
+      "nav.faq": "FAQ",
+      "nav.detailing": "Detailing",
+      "nav.listings": "Marketplace",
+
+      "hero.badge": "15,000+ Active Members",
+      "hero.title": "Your Czech Car Community",
+      "hero.subtitle": "Join discussions, read guides, and explore the automotive lifestyle in the Czech Republic.",
+      "hero.cta": "Join Forum",
+      "hero.cta2": "Read Guides",
+
+      "home.explore.title": "Explore the Community",
+      "home.explore.subtitle": "Everything you need for your automotive journey in CZ.",
+      "home.forums.title": "Active Forums",
+      "home.forums.desc": "Discuss everything from STK procedures to the best detailing shops in Prague. Get help from experienced expats and locals.",
+      "home.forums.btn": "Join Discussions",
+      "home.blog.title": "Guides & Blog",
+      "home.blog.desc": "In-depth articles covering car registration, buying guides, and technical maintenance for Czech roads.",
+      "home.blog.btn": "Read Articles",
+      "home.faq.title": "Czech FAQ",
+      "home.faq.desc": "Navigate the complex Czech legislation for car registration, technical inspections, and insurance with ease.",
+      "home.faq.btn": "See FAQ",
+
+      "faq.title": "Czech Car Legislation FAQ",
+      "faq.subtitle": "Everything you need to know about navigating the Czech bureaucratic system for your car.",
+      "faq.q1": "How to register a foreign car in CZ?",
+      "faq.a1": "You need an STK (Technical Inspection) protocol, emission check, and your foreign registration docs. Visit the local registry with these and your residency permit.",
+      "faq.q2": "What is the mandatory insurance (Povinné ručení)?",
+      "faq.a2": "It's third-party liability insurance required by law for all registered vehicles before they hit the road.",
+      "faq.docs.title": "Important Documents",
+      "faq.docs.subtitle": "Download the most needed forms for vehicle registration and STK.",
+      "faq.docs.form1": "Registration Form (Přihláška)",
+      "faq.docs.form2": "Power of Attorney (Plná moc)",
+      "faq.docs.form3": "Import Declaration",
+
+      "detailing.title": "Premium Auto Detailing",
+      "detailing.subtitle": "Experience our meticulously crafted detailing process designed to rejuvenate and protect your vehicle.",
+      "detailing.step1": "1. Foam Wash & Decontamination",
+      "detailing.step1.desc": "We start with a thorough wash to remove dirt without scratching the paint.",
+      "detailing.step2": "2. Multi-stage Paint Correction",
+      "detailing.step2.desc": "Machine polishing removes swirl marks and restores that showroom shine.",
+      "detailing.step3": "3. Ceramic Coating Protection",
+      "detailing.step3.desc": "A durable ceramic layer protects the paint from UV rays and chemicals.",
+      "detailing.3d": "Interactive 3D Demo - Drag to rotate",
+      "detailing.results": "Recent Results",
+      "detailing.reviews": "Customer Reviews",
+      "detailing.booking.title": "Ready to transform your ride?",
+      "detailing.booking.desc": "Book a consultation and let us tailor a detailing package for your vehicle.",
+      "detailing.booking.btn": "Book a Session",
+
+      "listings.title": "Community Marketplace",
+      "listings.subtitle": "Hand-picked, fully inspected vehicles ready for a new owner.",
+      "listings.btn": "View Details",
+
+      "forum.title": "Community Forum",
+      "forum.subtitle": "Join the conversation, ask questions, and share your automotive passion.",
+      "forum.search": "Search topics...",
+      "forum.new": "New Topic",
+      "forum.cats": "Categories",
+      "forum.cat.all": "All Topics",
+      "forum.cat.reg": "Registration & Imports",
+      "forum.cat.stk": "Legal & STK",
+      "forum.cat.det": "Detailing & Maintenance",
+      "forum.cat.buy": "Buying & Selling",
+      "forum.cat.gen": "General Discussion",
+      "forum.filter.recent": "Recent",
+      "forum.filter.hot": "Hot",
+      "forum.filter.unanswered": "Unanswered",
+      "forum.by": "By",
+      "forum.active": "Last active",
+
+      "blog.title": "Community Blog",
+      "blog.subtitle": "Guides, stories, and tips from the JiriCars community.",
+      "blog.read": "Read Article",
+      "blog.back": "Back to Blog",
+
+      "footer.desc": "Your one-stop hub for everything automotive in the Czech Republic.",
+      "footer.rights": "All rights reserved."
+    }
+  },
+  de: {
+    translation: {
+      "nav.home": "Startseite",
+      "nav.forum": "Forum",
+      "nav.blog": "Blog",
+      "nav.faq": "FAQ",
+      "nav.detailing": "Aufbereitung",
+      "nav.listings": "Marktplatz",
+
+      "hero.badge": "15.000+ aktive Mitglieder",
+      "hero.title": "Ihre tschechische Auto-Community",
+      "hero.subtitle": "Diskutieren Sie mit, lesen Sie Ratgeber und entdecken Sie den automobilen Lebensstil in der Tschechischen Republik.",
+      "hero.cta": "Dem Forum beitreten",
+      "hero.cta2": "Ratgeber lesen",
+
+      "home.explore.title": "Entdecke die Community",
+      "home.explore.subtitle": "Alles, was Sie für Ihre automobile Reise in CZ benötigen.",
+      "home.forums.title": "Aktive Foren",
+      "home.forums.desc": "Diskutieren Sie alles von STK bis zu den besten Aufbereitern. Holen Sie sich Hilfe.",
+      "home.forums.btn": "An Diskussionen teilnehmen",
+      "home.blog.title": "Ratgeber & Blog",
+      "home.blog.desc": "Detaillierte Artikel zu Fahrzeugzulassung, Kaufberatung und Wartung.",
+      "home.blog.btn": "Artikel lesen",
+      "home.faq.title": "Tschechische FAQ",
+      "home.faq.desc": "Navigieren Sie problemlos durch die tschechische Gesetzgebung für Autos.",
+      "home.faq.btn": "FAQ ansehen",
+
+      "faq.title": "FAQ zur tschechischen Gesetzgebung",
+      "faq.subtitle": "Alles, was Sie über das tschechische bürokratische System wissen müssen.",
+      "faq.q1": "Wie registriere ich ein ausländisches Auto in CZ?",
+      "faq.a1": "Sie benötigen ein STK (TÜV) Protokoll, eine Abgasuntersuchung und Ihre ausländischen Zulassungspapiere. Besuchen Sie die lokale Zulassungsstelle mit diesen und Ihrem Aufenthaltsstatus.",
+      "faq.q2": "Was ist die Pflichtversicherung (Povinné ručení)?",
+      "faq.a2": "Es ist eine gesetzlich vorgeschriebene Haftpflichtversicherung für alle zugelassenen Fahrzeuge.",
+      "faq.docs.title": "Wichtige Dokumente",
+      "faq.docs.subtitle": "Laden Sie die wichtigsten Formulare für Zulassung und STK herunter.",
+      "faq.docs.form1": "Anmeldeformular (Přihláška)",
+      "faq.docs.form2": "Vollmacht (Plná moc)",
+      "faq.docs.form3": "Einfuhrerklärung",
+
+      "detailing.title": "Premium Autoaufbereitung",
+      "detailing.subtitle": "Erleben Sie unseren sorgfältig ausgearbeiteten Aufbereitungsprozess.",
+      "detailing.step1": "1. Schaumwäsche & Dekontamination",
+      "detailing.step1.desc": "Wir beginnen mit einer gründlichen Wäsche, um Schmutz kratzerfrei zu entfernen.",
+      "detailing.step2": "2. Mehrstufige Lackkorrektur",
+      "detailing.step2.desc": "Maschinenpolitur entfernt Swirls und stellt den Glanz wieder her.",
+      "detailing.step3": "3. Keramikversiegelung",
+      "detailing.step3.desc": "Eine dauerhafte Keramikschicht schützt den Lack vor UV und Chemikalien.",
+      "detailing.3d": "Interaktive 3D-Demo - Ziehen zum Drehen",
+      "detailing.results": "Aktuelle Ergebnisse",
+      "detailing.reviews": "Kundenbewertungen",
+      "detailing.booking.title": "Bereit für eine Veränderung?",
+      "detailing.booking.desc": "Buchen Sie eine Beratung für Ihr Fahrzeug.",
+      "detailing.booking.btn": "Termin buchen",
+
+      "listings.title": "Community-Marktplatz",
+      "listings.subtitle": "Handverlesene, geprüfte Fahrzeuge bereit für einen neuen Besitzer.",
+      "listings.btn": "Details ansehen",
+
+      "forum.title": "Community Forum",
+      "forum.subtitle": "Tauschen Sie sich aus, stellen Sie Fragen und teilen Sie Ihre Leidenschaft.",
+      "forum.search": "Themen suchen...",
+      "forum.new": "Neues Thema",
+      "forum.cats": "Kategorien",
+      "forum.cat.all": "Alle Themen",
+      "forum.cat.reg": "Zulassung & Import",
+      "forum.cat.stk": "Rechtliches & STK",
+      "forum.cat.det": "Aufbereitung & Wartung",
+      "forum.cat.buy": "Kaufen & Verkaufen",
+      "forum.cat.gen": "Allgemeine Diskussion",
+      "forum.filter.recent": "Kürzlich",
+      "forum.filter.hot": "Heiß",
+      "forum.filter.unanswered": "Unbeantwortet",
+      "forum.by": "Von",
+      "forum.active": "Zuletzt aktiv",
+
+      "blog.title": "Community Blog",
+      "blog.subtitle": "Ratgeber, Geschichten und Tipps aus der JiriCars-Community.",
+      "blog.read": "Artikel lesen",
+      "blog.back": "Zurück zum Blog",
+
+      "footer.desc": "Ihre zentrale Anlaufstelle für alles rund ums Auto in der Tschechischen Republik.",
+      "footer.rights": "Alle Rechte vorbehalten."
+    }
+  },
+  cs: {
+    translation: {
+      "nav.home": "Domů",
+      "nav.forum": "Fórum",
+      "nav.blog": "Blog",
+      "nav.faq": "FAQ",
+      "nav.detailing": "Detailing",
+      "nav.listings": "Tržiště",
+
+      "hero.badge": "15 000+ aktivních členů",
+      "hero.title": "Vaše česká auto komunita",
+      "hero.subtitle": "Zapojte se do diskusí, čtěte návody a objevujte automobilový životní styl v ČR.",
+      "hero.cta": "Vstoupit do fóra",
+      "hero.cta2": "Číst návody",
+
+      "home.explore.title": "Prozkoumejte komunitu",
+      "home.explore.subtitle": "Vše, co potřebujete pro váš automobilový život v ČR.",
+      "home.forums.title": "Aktivní fóra",
+      "home.forums.desc": "Diskutujte o všem od STK po nejlepší detailing. Získejte pomoc od zkušených.",
+      "home.forums.btn": "Připojit se k diskusím",
+      "home.blog.title": "Návody a Blog",
+      "home.blog.desc": "Podrobné články o registraci aut, nákupní průvodci a údržba.",
+      "home.blog.btn": "Číst články",
+      "home.faq.title": "Česká FAQ",
+      "home.faq.desc": "Zorientujte se snadno v české legislativě, registraci a STK.",
+      "home.faq.btn": "Zobrazit FAQ",
+
+      "faq.title": "FAQ Česká legislativa",
+      "faq.subtitle": "Vše, co potřebujete vědět o orientaci v českém byrokratickém systému.",
+      "faq.q1": "Jak zaregistrovat auto z dovozu?",
+      "faq.a1": "Potřebujete dovozovou STK, měření emisí a zahraniční TP. S těmito dokumenty navštivte registr vozidel.",
+      "faq.q2": "Co je to povinné ručení?",
+      "faq.a2": "Zákonné pojištění odpovědnosti z provozu vozidla, které musí mít každé vozidlo na veřejné komunikaci.",
+      "faq.docs.title": "Důležité dokumenty",
+      "faq.docs.subtitle": "Stáhněte si nejpotřebnější formuláře pro registraci a STK.",
+      "faq.docs.form1": "Přihláška k registraci",
+      "faq.docs.form2": "Plná moc",
+      "faq.docs.form3": "Celní prohlášení",
+
+      "detailing.title": "Prémiový Auto Detailing",
+      "detailing.subtitle": "Zažijte náš pečlivý proces detailingu pro oživení a ochranu vašeho vozu.",
+      "detailing.step1": "1. Pěnové mytí a dekontaminace",
+      "detailing.step1.desc": "Začínáme důkladným mytím pro odstranění špíny bez poškrábání laku.",
+      "detailing.step2": "2. Vícestupňová korekce laku",
+      "detailing.step2.desc": "Strojní leštění odstraní škrábance a obnoví lesk.",
+      "detailing.step3": "3. Keramická ochrana",
+      "detailing.step3.desc": "Odolná keramická vrstva chrání lak před UV zářením a chemikáliemi.",
+      "detailing.3d": "Interaktivní 3D ukázka - tažením otáčejte",
+      "detailing.results": "Nedávné výsledky",
+      "detailing.reviews": "Hodnocení zákazníků",
+      "detailing.booking.title": "Připraveni na proměnu?",
+      "detailing.booking.desc": "Zarezervujte si konzultaci a my vám připravíme balíček na míru.",
+      "detailing.booking.btn": "Rezervovat termín",
+
+      "listings.title": "Komunitní tržiště",
+      "listings.subtitle": "Ručně vybrané, prověřené vozy připravené pro nového majitele.",
+      "listings.btn": "Zobrazit detaily",
+
+      "forum.title": "Komunitní Fórum",
+      "forum.subtitle": "Zapojte se do konverzace, ptejte se a sdílejte svou vášeň pro auta.",
+      "forum.search": "Hledat témata...",
+      "forum.new": "Nové téma",
+      "forum.cats": "Kategorie",
+      "forum.cat.all": "Všechna témata",
+      "forum.cat.reg": "Registrace a dovoz",
+      "forum.cat.stk": "Legislativa a STK",
+      "forum.cat.det": "Detailing a údržba",
+      "forum.cat.buy": "Koupě a prodej",
+      "forum.cat.gen": "Obecná diskuse",
+      "forum.filter.recent": "Nejnovější",
+      "forum.filter.hot": "Horké",
+      "forum.filter.unanswered": "Nezodpovězené",
+      "forum.by": "Od",
+      "forum.active": "Poslední aktivita",
+
+      "blog.title": "Komunitní Blog",
+      "blog.subtitle": "Návody, příběhy a tipy od komunity JiriCars.",
+      "blog.read": "Číst článek",
+      "blog.back": "Zpět na blog",
+
+      "footer.desc": "Váš komplexní průvodce vším okolo aut v České republice.",
+      "footer.rights": "Všechna práva vyhrazena."
+    }
+  }
+};
+
+i18n
+  .use(initReactI18next)
+  .init({
+    resources,
+    lng: "en", // default language
+    fallbackLng: "en",
+    interpolation: {
+      escapeValue: false
+    }
+  });
+
+export default i18n;
