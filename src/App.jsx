@@ -3,13 +3,12 @@ import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
-import FAQ from './pages/FAQ';
-import Detailing from './pages/Detailing';
 import Listings from './pages/Listings';
-import Forum from './pages/Forum';
-import Blog from './pages/Blog';
-import Article from './pages/Article';
-import { motion, AnimatePresence } from 'framer-motion';
+import Inquiry from './pages/Inquiry';
+import Rental from './pages/Rental';
+import Reviews from './pages/Reviews';
+import Contact from './pages/Contact';
+import { AnimatePresence } from 'framer-motion';
 
 function App() {
   return (
@@ -19,12 +18,11 @@ function App() {
         <AnimatePresence mode="wait">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/forum" element={<Forum />} />
-            <Route path="/blog" element={<Blog />} />
-            <Route path="/blog/:id" element={<Article />} />
-            <Route path="/faq" element={<FAQ />} />
-            <Route path="/detailing" element={<Detailing />} />
             <Route path="/listings" element={<Listings />} />
+            <Route path="/inquiry" element={<Inquiry />} />
+            <Route path="/rental" element={<Rental />} />
+            <Route path="/reviews" element={<Reviews />} />
+            <Route path="/contact" element={<Contact />} />
           </Routes>
         </AnimatePresence>
       </main>

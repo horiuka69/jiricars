@@ -1,0 +1,331 @@
+.rental-page {
+  padding-top: 8rem;
+  padding-bottom: 6rem;
+}
+
+.rental-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.rental-header h1 {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #fff 60%, var(--text-main) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.rental-header p {
+  color: var(--text-main);
+  font-size: 1.1rem;
+}
+
+/* Page Layout */
+.rental-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .rental-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+/* Left Column: Details & Images */
+.rental-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.tow-truck-preview {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid var(--glass-border);
+  height: 380px;
+}
+
+.tow-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.image-badge {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.25rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Specs Details */
+.specs-card {
+  padding: 2.5rem;
+  border-radius: 24px;
+  border: 1px solid var(--glass-border);
+}
+
+.specs-card h3 {
+  font-size: 1.4rem;
+  color: var(--text-light);
+  margin-bottom: 1.5rem;
+}
+
+.specs-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 576px) {
+  .specs-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.spec-tile {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.spec-icon {
+  color: var(--secondary-color);
+  background: rgba(6, 182, 212, 0.08);
+  border: 1px solid rgba(6, 182, 212, 0.15);
+  padding: 0.6rem;
+  border-radius: 12px;
+  box-sizing: content-box;
+  flex-shrink: 0;
+}
+
+.spec-tile div {
+  display: flex;
+  flex-direction: column;
+}
+
+.spec-tile strong {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  margin-bottom: 0.25rem;
+}
+
+.spec-tile span {
+  font-size: 0.85rem;
+  color: var(--text-main);
+}
+
+/* Right Column: Calendar Booking */
+.calendar-card {
+  padding: 2.5rem;
+  border-radius: 24px;
+  border: 1px solid var(--glass-border);
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.cal-icon {
+  color: var(--secondary-color);
+}
+
+.calendar-header h3 {
+  font-size: 1.4rem;
+  color: var(--text-light);
+}
+
+.calendar-sub {
+  font-size: 0.9rem;
+  color: var(--text-main);
+  margin-bottom: 1.5rem;
+}
+
+/* Navigation Row */
+.month-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+}
+
+.month-nav-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.month-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--secondary-color);
+}
+
+.current-month-display {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-light);
+  letter-spacing: 0.5px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.4rem;
+  margin-bottom: 2rem;
+}
+
+.weekday-header {
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+  padding-bottom: 0.5rem;
+}
+
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  border: 1px solid transparent;
+}
+
+.calendar-day.empty {
+  cursor: default;
+  background: transparent;
+  border: none;
+}
+
+/* Strictly Red and Green calendar cells */
+.calendar-day.free {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  color: var(--success);
+}
+
+.calendar-day.free:hover {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: var(--success);
+  transform: scale(1.05);
+}
+
+.calendar-day.booked {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: var(--danger);
+  cursor: not-allowed;
+}
+
+/* Range Selected states */
+.calendar-day.selected {
+  background: rgba(6, 182, 212, 0.25) !important;
+  border-color: var(--secondary-color) !important;
+  color: var(--text-light) !important;
+  border-radius: 0;
+}
+
+.calendar-day.range-start {
+  border-top-left-radius: 8px !important;
+  border-bottom-left-radius: 8px !important;
+  background: var(--primary-color) !important;
+  color: #fff !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: -4px 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.calendar-day.range-end {
+  border-top-right-radius: 8px !important;
+  border-bottom-right-radius: 8px !important;
+  background: var(--secondary-color) !important;
+  color: #fff !important;
+  border-color: var(--secondary-color) !important;
+  box-shadow: 4px 0 10px rgba(6, 182, 212, 0.3);
+}
+
+/* Booking Action Area */
+.booking-action-area {
+  border-top: 1px solid var(--glass-border);
+  padding-top: 1.5rem;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.no-selection-msg {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-main);
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.no-selection-msg svg {
+  color: var(--text-main);
+  opacity: 0.6;
+}
+
+.selection-confirm {
+  width: 100%;
+  text-align: center;
+}
+
+.selection-confirm p {
+  font-size: 0.95rem;
+  color: var(--text-light);
+  line-height: 1.5;
+}
+
+.duration-label {
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  color: var(--text-main);
+}
+
+.rental-success-msg {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid var(--success);
+  padding: 1rem;
+  border-radius: 10px;
+  color: var(--text-light);
+  font-size: 0.9rem;
+  text-align: center;
+  width: 100%;
+}
