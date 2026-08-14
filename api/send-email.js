@@ -48,7 +48,7 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${resendApiKey}`
       },
       body: JSON.stringify({
-        from: 'easyodtah.cz Website <onboarding@resend.dev>', // Resend sandbox default. If domain verified, can be e.g. info@easyodtah.cz
+        from: 'easyodtah.cz <noreply@easyodtah.cz>',
         to: toEmail,
         subject: emailSubject,
         html: htmlBody
