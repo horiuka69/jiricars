@@ -42,6 +42,7 @@ const Rental = () => {
 
   // Specs array
   const specs = [
+    { label: t('rental.specs.license'), icon: <Award size={18} /> },
     { label: t('rental.specs.engine'), icon: <Fuel size={18} /> },
     { label: t('rental.specs.transmission'), icon: <Cpu size={18} /> },
     { label: t('rental.specs.bed'), icon: <Shield size={18} /> },

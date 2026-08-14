@@ -75,10 +75,6 @@ const TowingServices = () => {
     <PageTransition>
       <section className="towing-services-page container">
         <div className="towing-header">
-          <div className="emergency-badge">
-            <AlertTriangle size={16} />
-            <span>EMERGENCY ASSISTANCE 24/7</span>
-          </div>
           <h1>{t('towing.title')}</h1>
           <p style={{ fontWeight: 600, fontSize: '1.25rem', color: 'var(--text-light)' }}>
             {t('towing.subtitle')}
@@ -123,6 +119,11 @@ const TowingServices = () => {
                   </p>
                 </div>
               </div>
+              
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-main)', marginTop: '1rem', borderTop: '1px dashed var(--glass-border)', paddingTop: '0.75rem', lineHeight: 1.4 }}>
+                {t('towing.pricing.route_info')}
+              </p>
+
               <span style={{ fontSize: '0.8rem', color: 'var(--secondary-color)', display: 'block', marginTop: '0.75rem', fontWeight: 600 }}>
                 {t('towing.pricing.currency_info')}
               </span>

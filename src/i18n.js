@@ -55,8 +55,9 @@ const resources = {
 
       // Rental Page
       "rental.title": "Tow Truck Rental",
-      "rental.subtitle": "Rent our professional Citroën Jumper tow truck. Check specifications and calculate pricing below.",
+      "rental.subtitle": "Rent our professional Citroën Jumper (3.5t) tow truck. Check specifications and calculate pricing below. A class B driver's license is sufficient to drive.",
       "rental.specs.title": "Tow Truck Specifications",
+      "rental.specs.license": "License: Class B driver's license",
       "rental.specs.engine": "Engine: 3.0 HDi (Iveco origin, F1CE...)",
       "rental.specs.transmission": "Transmission: 6-speed manual",
       "rental.specs.bed": "Load Area: 4.75m x 2.1m (GROMEX) + ramps",
@@ -101,7 +102,7 @@ const resources = {
       "towing.subtitle": "towing of passenger vehicles and motorcycles within CZ and EU",
       "towing.desc": "we will arrange the transport or towing of your non-drivable vehicle and motorcycle",
       "towing.emergency.title": "24/7 Emergency Hotlines",
-      "towing.emergency.desc": "Call us directly for fast towing and assistance services in Czech Republic and across Europe.",
+      "towing.emergency.desc": "Call us immediately for fast dispatch of a tow truck.",
       "towing.emergency.btn": "Call Emergency Towing: +420 737 218 650",
       "towing.pricing.title": "Pricing List",
       "towing.pricing.flat_label": "Perimeter of 30km from Všetaty u Rakovníka",
@@ -109,6 +110,7 @@ const resources = {
       "towing.pricing.km_label": "Other towing outside 30km limit",
       "towing.pricing.km_val": "22,- / km",
       "towing.pricing.fee": "+ manipulation fee 1,500,- for loading / unloading the vehicle.",
+      "towing.pricing.route_info": "For the towing price, the route is calculated as: base (Všetaty u Rakovníka) > loading location > unloading location > base.",
       "towing.pricing.currency_info": "* All prices are listed in CZK.",
       "towing.map.badge": "30km perimeter from Všetaty u Rakovníka",
 
@@ -182,8 +184,9 @@ const resources = {
       "inquiry.success": "Anfrage erfolgreich gesendet! Wir senden Ihnen in Kürze ein Angebot.",
 
       "rental.title": "Abschleppwagen-Vermietung",
-      "rental.subtitle": "Mieten Sie unseren professionellen Citroën Jumper Abschleppwagen. Details ansehen und Preis berechnen.",
+      "rental.subtitle": "Mieten Sie unseren professionellen Citroën Jumper (3.5t) Abschleppwagen. Details ansehen und Preis berechnen. Ein Führerschein der Klasse B reicht aus.",
       "rental.specs.title": "Technische Daten",
+      "rental.specs.license": "Führerschein: Klasse B",
       "rental.specs.engine": "Motor: 3.0 HDi (Iveco-Herkunft, F1CE...)",
       "rental.specs.transmission": "Getriebe: 6-Gang-Schaltgetriebe",
       "rental.specs.bed": "Ladefläche: 4.75m x 2.1m (GROMEX) + Auffahrschienen",
@@ -228,7 +231,7 @@ const resources = {
       "towing.subtitle": "Abschleppen von PKWs und Motorrädern in Tschechien und der EU",
       "towing.desc": "wir organisieren den Transport oder das Abschleppen Ihres fahruntauglichen Fahrzeugs und Motorrads",
       "towing.emergency.title": "Notruf-Hotlines 24/7",
-      "towing.emergency.desc": "Rufen Sie uns direkt an für schnelle Abschleppung in Tschechien und ganz Europa.",
+      "towing.emergency.desc": "Rufen Sie uns sofort an für die schnelle Bereitstellung eines Abschleppwagens.",
       "towing.emergency.btn": "Abschleppdienst anrufen: +420 737 218 650",
       "towing.pricing.title": "Preisliste",
       "towing.pricing.flat_label": "Umkreis von 30 km um Všetaty u Rakovníka",
@@ -236,6 +239,7 @@ const resources = {
       "towing.pricing.km_label": "Andere Abschleppdienste außerhalb des 30-km-Limits",
       "towing.pricing.km_val": "22,- / km",
       "towing.pricing.fee": "+ Bearbeitungsgebühr 1.500,- für das Be- und Entladen des Fahrzeugs.",
+      "towing.pricing.route_info": "Für den Abschlepppreis wird die Route wie folgt berechnet: Basis (Všetaty u Rakovníka) > Beladeort > Entladeort > Basis.",
       "towing.pricing.currency_info": "* Alle Preise sind in CZK angegeben.",
       "towing.map.badge": "30-km-Umkreis um Všetaty u Rakovníka",
 
@@ -307,8 +311,9 @@ const resources = {
       "inquiry.success": "Poptávka byla úspěšně odeslána! Brzy vás kontaktujeme s cenovou nabídkou.",
 
       "rental.title": "Pronájem odtahového vozu",
-      "rental.subtitle": "Pronajměte si náš profesionální odtahový vůz Citroën Jumper. Podívejte se na specifikace a spočítejte si cenu.",
+      "rental.subtitle": "Pronajměte si náš profesionální odtahový vůz Citroën Jumper (3.5t). Podívejte se na specifikace a spočítejte si cenu. K řízení stačí řidičské oprávnění sk. B.",
       "rental.specs.title": "Technické specifikace",
+      "rental.specs.license": "Řidičské oprávnění: Skupina B",
       "rental.specs.engine": "Motor: 3.0 HDi (původem od Iveca, označovaný také jako F1CE...)",
       "rental.specs.transmission": "Převodovka: 6stupňová manuální",
       "rental.specs.bed": "Ložná plocha: 4.750m x 2.1m (GROMEX) + nájezdy",
@@ -353,7 +358,7 @@ const resources = {
       "towing.subtitle": "odtahy osobních vozidel a motocyklů v rámci ČR a EU",
       "towing.desc": "zajistíme pro Vás převoz nebo odtáhnutí nepojízdného vozidla a motocyklu",
       "towing.emergency.title": "Rychlý kontakt pro nouzový odtah",
-      "towing.emergency.desc": "Volejte ihned pro rychlé přistavení odtahového vozu v ČR i po celé Evropě.",
+      "towing.emergency.desc": "Volejte ihned pro rychlé přistavení odtahového vozu.",
       "towing.emergency.btn": "Volejte odtahovou službu: +420 737 218 650",
       "towing.pricing.title": "Ceník služeb",
       "towing.pricing.flat_label": "Perimetr 30km od Všetat u Rakovníka",
@@ -361,6 +366,7 @@ const resources = {
       "towing.pricing.km_label": "Ostatní odtahy mimo 30km limit",
       "towing.pricing.km_val": "22,- / km",
       "towing.pricing.fee": "+ manipulační poplatek 1500,- za naložení / vyložení vozidla.",
+      "towing.pricing.route_info": "Pro cenu odtahu se počítá cesta: základna (Všetaty u Rakovníka) > místo nakládky > místo vykládky > základna.",
       "towing.pricing.currency_info": "* Všechny ceny jsou uvedeny v CZK.",
       "towing.map.badge": "30km perimetr z Všetat u Rakovníka",
 

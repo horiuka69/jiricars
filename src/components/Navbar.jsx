@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Globe, Car, ChevronDown, Menu, X } from 'lucide-react';
+import logoImg from '../assets/logo.jpg';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -60,8 +61,8 @@ const Navbar = () => {
   return (
     <nav className="navbar glass-panel">
       <div className="container nav-container">
-        <Link to="/" className="logo" onClick={() => setMobileMenuOpen(false)}>
-          <Car className="logo-icon" size={28} />
+        <Link to="/" className="logo" onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <img src={logoImg} alt="easyodtah.cz Logo" style={{ height: '38px', borderRadius: '6px' }} />
           <span>easyodtah.cz</span>
         </Link>
         
