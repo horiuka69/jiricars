@@ -238,3 +238,15 @@
   border-radius: 6px;
   border: 1px solid var(--glass-border);
 }
+
+.facebook-link {
+  transition: all 0.25s ease;
+}
+.facebook-link:hover {
+  transform: translateY(-2px);
+}
+.facebook-link:hover .contact-icon {
+  background: rgba(24, 119, 242, 0.15);
+  border-color: rgba(24, 119, 242, 0.4);
+  color: #1877f2;
+}
