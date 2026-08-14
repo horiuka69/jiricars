@@ -125,7 +125,7 @@ const resources = {
 
       // Contact Page
       "contact.title": "Get in Touch",
-      "contact.subtitle": "Have questions? Contact EasyOdtah.cz or visit us in Všetaty u Rakovníka.",
+      "contact.subtitle": "Have questions? Contact us here.",
       "contact.info.title": "Contact Details",
       "contact.hours.title": "Business Hours",
       "contact.form.title": "Send us a Message",
@@ -250,7 +250,7 @@ const resources = {
       "reviews.success": "Vielen Dank! Ihre Bewertung wurde zur Prüfung eingereicht.",
 
       "contact.title": "Kontaktieren Sie uns",
-      "contact.subtitle": "Haben Sie Fragen? Kontaktieren Sie uns oder besuchen Sie uns in Všetaty u Rakovníka.",
+      "contact.subtitle": "Haben Sie Fragen? Kontaktieren Sie uns hier.",
       "contact.info.title": "Kontaktinfos",
       "contact.hours.title": "Öffnungszeiten",
       "contact.form.title": "Nachricht senden",
@@ -375,7 +375,7 @@ const resources = {
       "reviews.success": "Děkujeme! Vaše hodnocení bylo odesláno ke schválení.",
 
       "contact.title": "Kontaktujte nás",
-      "contact.subtitle": "Máte otázky? Kontaktujte EasyOdtah.cz nebo nás navštivte ve Všetatech u Rakovníka.",
+      "contact.subtitle": "Máte otázky? Kontaktujte nás zde.",
       "contact.info.title": "Kontaktní údaje",
       "contact.hours.title": "Otevírací doba",
       "contact.form.title": "Napište nám zprávu",
