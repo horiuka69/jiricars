@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import Listings from './pages/Listings';
 import Inquiry from './pages/Inquiry';
 import Rental from './pages/Rental';
+import TowingServices from './pages/TowingServices';
 import Reviews from './pages/Reviews';
 import Contact from './pages/Contact';
 import { AnimatePresence } from 'framer-motion';
@@ -21,6 +22,7 @@ function App() {
             <Route path="/listings" element={<Listings />} />
             <Route path="/inquiry" element={<Inquiry />} />
             <Route path="/rental" element={<Rental />} />
+            <Route path="/odtahove-sluzby" element={<TowingServices />} />
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>

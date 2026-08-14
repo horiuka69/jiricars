@@ -34,13 +34,32 @@ const Contact = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitted(true);
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setFormData({ name: '', email: '', subject: '', message: '' });
-    }, 4000);
+    try {
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          formType: 'contact',
+          name: formData.name,
+          email: formData.email,
+          subject: formData.subject,
+          message: formData.message
+        })
+      });
+      if (response.ok) {
+        setIsSubmitted(true);
+        setTimeout(() => {
+          setIsSubmitted(false);
+          setFormData({ name: '', email: '', subject: '', message: '' });
+        }, 4000);
+      } else {
+        console.error('Failed to send contact message via email');
+      }
+    } catch (err) {
+      console.error('Error submitting contact form:', err);
+    }
   };
 
   return (
@@ -173,15 +192,6 @@ const Contact = () => {
                   </button>
                 </form>
               )}
-            </div>
-
-            {/* Stylized Mock Map */}
-            <div className="mock-map glass-panel">
-              <div className="map-radar"></div>
-              <div className="map-pin-pulse">
-                <MapPin size={24} fill="currentColor" />
-              </div>
-              <span className="map-label">easyodtah.cz Headquarters - Prague</span>
             </div>
           </div>
         </div>

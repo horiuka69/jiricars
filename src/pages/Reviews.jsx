@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Star, MessageSquarePlus, User, CheckCircle2 } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
+import { db } from '../firebase';
+import { collection, addDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
 import './Reviews.css';
 
 const Reviews = () => {
@@ -12,51 +14,74 @@ const Reviews = () => {
   const [rating, setRating] = useState(5);
   const [name, setName] = useState('');
   const [comment, setComment] = useState('');
+  const [reviewsList, setReviewsList] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Initial dummy review data
-  const [reviewsList, setReviewsList] = useState([
-    {
-      id: 1,
-      name: "Marek K.",
-      rating: 5,
-      date: "2026-07-10",
-      comment: "Absolutely top-tier import service! Brought my Audi RS6 from Frankfurt to Prague within 48 hours, fully insured. Kept me updated with GPS locations all the way. Recommending JiriCars to all my colleagues!"
-    },
-    {
-      id: 2,
-      name: "Sofia M.",
-      rating: 5,
-      date: "2026-07-04",
-      comment: "Purchased a Mercedes E63 from their marketplace. The car was in immaculate condition, fully polished, and detailed. Jiri is a true professional."
-    },
-    {
-      id: 3,
-      name: "David V.",
-      rating: 4,
-      date: "2026-06-25",
-      comment: "Rented the tow truck for transport from Austria. Booking was straightforward on their calendar. Winch worked perfectly, vehicle is very modern. 4/5 because of slightly tight cabin storage, otherwise perfect!"
-    }
-  ]);
+  // Sync with Firestore
+  useEffect(() => {
+    const q = query(collection(db, 'reviews'), orderBy('date', 'desc'));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedReviews = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      
+      // Seed initial reviews if collection is empty
+      if (fetchedReviews.length === 0) {
+        const initialReviews = [
+          {
+            name: "Marek K.",
+            rating: 5,
+            date: "2026-07-10",
+            comment: "Absolutely top-tier import service! Brought my Audi RS6 from Frankfurt to Prague within 48 hours, fully insured. Kept me updated with GPS locations all the way. Recommending JiriCars to all my colleagues!"
+          },
+          {
+            name: "Sofia M.",
+            rating: 5,
+            date: "2026-07-04",
+            comment: "Purchased a Mercedes E63 from their marketplace. The car was in immaculate condition, fully polished, and detailed. Jiri is a true professional."
+          },
+          {
+            name: "David V.",
+            rating: 4,
+            date: "2026-06-25",
+            comment: "Rented the tow truck for transport from Austria. Booking was straightforward on their calendar. Winch worked perfectly, vehicle is very modern. 4/5 because of slightly tight cabin storage, otherwise perfect!"
+          }
+        ];
+        initialReviews.forEach(async (rev) => {
+          await addDoc(collection(db, 'reviews'), rev);
+        });
+      } else {
+        setReviewsList(fetchedReviews);
+      }
+      setLoading(false);
+    });
 
-  const handleSubmit = (e) => {
+    return () => unsubscribe();
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (name && comment) {
       const newReview = {
-        id: reviewsList.length + 1,
         name,
         rating,
         date: new Date().toISOString().split('T')[0],
         comment
       };
-      setReviewsList([newReview, ...reviewsList]);
-      setIsSubmitted(true);
-      setTimeout(() => {
-        setIsSubmitted(false);
-        setShowSubmitForm(false);
-        setName('');
-        setComment('');
-        setRating(5);
-      }, 3000);
+      try {
+        await addDoc(collection(db, 'reviews'), newReview);
+        setIsSubmitted(true);
+        setTimeout(() => {
+          setIsSubmitted(false);
+          setShowSubmitForm(false);
+          setName('');
+          setComment('');
+          setRating(5);
+        }, 3000);
+      } catch (error) {
+        console.error("Error adding review to Firestore: ", error);
+      }
     }
   };
 
@@ -67,13 +92,15 @@ const Reviews = () => {
   };
 
   // Stats calculation
-  const totalReviews = reviewsList.length;
-  const averageRating = (reviewsList.reduce((acc, curr) => acc + curr.rating, 0) / totalReviews).toFixed(1);
+  const totalReviews = reviewsList.length || 1;
+  const averageRating = reviewsList.length > 0 
+    ? (reviewsList.reduce((acc, curr) => acc + curr.rating, 0) / reviewsList.length).toFixed(1)
+    : "5.0";
 
   // Distribution calculations
   const distribution = [5, 4, 3, 2, 1].map(stars => {
     const count = reviewsList.filter(r => r.rating === stars).length;
-    const percentage = totalReviews > 0 ? (count / totalReviews) * 100 : 0;
+    const percentage = reviewsList.length > 0 ? (count / reviewsList.length) * 100 : 0;
     return { stars, percentage, count };
   });
 

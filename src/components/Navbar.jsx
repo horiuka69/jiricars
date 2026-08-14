@@ -29,9 +29,10 @@ const Navbar = () => {
 
   const navLinks = [
     { path: '/', labelKey: 'nav.home' },
-    { path: '/listings', labelKey: 'nav.listings' },
-    { path: '/inquiry', labelKey: 'nav.inquiry' },
     { path: '/rental', labelKey: 'nav.rental' },
+    { path: '/odtahove-sluzby', labelKey: 'nav.emergency_towing' },
+    { path: '/inquiry', labelKey: 'nav.inquiry' },
+    { path: '/listings', labelKey: 'nav.listings' },
     { path: '/reviews', labelKey: 'nav.reviews' },
     { path: '/contact', labelKey: 'nav.contact' },
   ];

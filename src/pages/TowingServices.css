@@ -1,0 +1,253 @@
+.towing-services-page {
+  padding-top: 8rem;
+  padding-bottom: 6rem;
+}
+
+.towing-header {
+  text-align: center;
+  margin-bottom: 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.emergency-badge {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.15);
+}
+
+.towing-header h1 {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #fff 60%, #f87171 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.towing-header p {
+  color: var(--text-main);
+  font-size: 1.1rem;
+  max-width: 600px;
+}
+
+/* Grid Layout */
+.towing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 3rem;
+  align-items: stretch;
+}
+
+@media (max-width: 992px) {
+  .towing-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+}
+
+.towing-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.towing-right-col {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.map-container-wrapper {
+  flex-grow: 1;
+  position: relative;
+  width: 100%;
+  min-height: 420px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 992px) {
+  .map-container-wrapper {
+    min-height: 350px;
+  }
+}
+
+/* Emergency Call Card */
+.emergency-call-card {
+  padding: 3rem 2rem;
+  border-radius: 24px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: radial-gradient(circle at top right, rgba(239, 68, 68, 0.05), transparent);
+}
+
+.pulse-circle {
+  width: 90px;
+  height: 90px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 2px solid rgba(239, 68, 68, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.75rem;
+  position: relative;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.2);
+  animation: pulse 2s infinite;
+}
+
+.pulse-icon {
+  color: #ef4444;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 18px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.emergency-call-card h2 {
+  font-size: 1.5rem;
+  color: var(--text-light);
+  margin-bottom: 1rem;
+}
+
+.emergency-call-card p {
+  font-size: 0.95rem;
+  color: var(--text-main);
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  max-width: 320px;
+}
+
+.emergency-dial-btn {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ef4444, #b91c1c) !important;
+  color: #fff !important;
+  border: none !important;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  transition: all 0.3s ease;
+}
+
+.emergency-dial-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.45);
+}
+
+.availability-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  color: #f87171;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Towing Info Card */
+.towing-info-card {
+  padding: 3rem;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.towing-info-card h3 {
+  font-size: 1.5rem;
+  color: var(--text-light);
+  margin-bottom: 2rem;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 1rem;
+}
+
+.services-list-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+}
+
+.towing-service-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.check-icon {
+  color: #ef4444;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.towing-service-item span {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--text-light);
+}
+
+.insurance-badge-box {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px;
+}
+
+.insurance-badge-box svg {
+  color: var(--secondary-color);
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+}
+
+.insurance-badge-box div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.insurance-badge-box strong {
+  font-size: 0.95rem;
+  color: var(--text-light);
+}
+
+.insurance-badge-box span {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--text-main);
+}
