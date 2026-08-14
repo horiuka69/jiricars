@@ -30,6 +30,8 @@
   font-weight: 700;
   color: var(--text-light);
   letter-spacing: -0.5px;
+  position: relative;
+  z-index: 1010;
 }
 
 .logo-icon {
@@ -77,6 +79,8 @@
   display: flex;
   align-items: center;
   gap: 1rem;
+  position: relative;
+  z-index: 1010;
 }
 
 /* Custom Flags Dropdown Selector */
@@ -182,17 +186,17 @@
 
   .nav-links {
     position: fixed;
-    top: 80px;
+    top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(10, 10, 12, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    width: 100vw;
+    height: 100vh;
+    background: rgba(10, 10, 12, 0.96);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
     flex-direction: column;
-    padding: 3rem 2rem;
-    gap: 2.25rem;
-    justify-content: center;
+    padding: 8rem 2rem 3rem 2rem;
+    gap: 2rem;
+    justify-content: flex-start;
     align-items: center;
     transform: translateY(-100%);
     opacity: 0;
@@ -200,6 +204,7 @@
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 999;
     overflow-y: auto;
+    box-sizing: border-box;
   }
 
   .nav-links.active {
@@ -209,7 +214,7 @@
   }
 
   .nav-link {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: 600;
     color: var(--text-main);
   }
