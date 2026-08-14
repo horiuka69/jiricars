@@ -99,35 +99,7 @@ const Contact = () => {
                   <span>Všetaty u Rakovníka, 270 21</span>
                 </div>
               </div>
-            </div>
-
-            <div className="hours-card glass-panel">
-              <h3>{t('contact.hours.title')}</h3>
-              
-              <div className="hours-detail-item">
-                <Clock size={20} className="hours-icon" />
-                <div className="hours-row">
-                  <span>Monday - Friday</span>
-                  <strong>08:00 - 18:00</strong>
-                </div>
-              </div>
-
-              <div className="hours-detail-item">
-                <Clock size={20} className="hours-icon" />
-                <div className="hours-row">
-                  <span>Saturday</span>
-                  <strong>09:00 - 14:00</strong>
-                </div>
-              </div>
-
-              <div className="hours-detail-item">
-                <Clock size={20} className="hours-icon" />
-                <div className="hours-row">
-                  <span>Sunday</span>
-                  <strong>Closed / On Call</strong>
-                </div>
-              </div>
-            </div>
+            </div>            
           </div>
 
           {/* Right Column: Contact form & Mock map */}
