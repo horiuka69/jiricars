@@ -39,7 +39,7 @@ const Footer = () => {
           <h4>{t('nav.contact')}</h4>
           <div className="contact-item">
             <Phone size={16} />
-            <span>+420 777 888 999</span>
+            <span>+420 737 218 650</span>
           </div>
           <div className="contact-item">
             <Mail size={16} />
@@ -47,7 +47,7 @@ const Footer = () => {
           </div>
           <div className="contact-item">
             <MapPin size={16} />
-            <span>Průmyslová 12, Prague, CZ</span>
+            <span>Všetaty u Rakovníka, 270 21</span>
           </div>
         </div>
       </div>

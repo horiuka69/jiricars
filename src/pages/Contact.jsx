@@ -80,7 +80,7 @@ const Contact = () => {
                 <Phone size={22} className="contact-icon" />
                 <div>
                   <strong>Phone</strong>
-                  <span>+420 777 888 999</span>
+                  <span>+420 737 218 650</span>
                 </div>
               </div>
 
@@ -96,7 +96,7 @@ const Contact = () => {
                 <MapPin size={22} className="contact-icon" />
                 <div>
                   <strong>Location</strong>
-                  <span>Průmyslová 12, Prague, Czech Republic</span>
+                  <span>Všetaty u Rakovníka, 270 21</span>
                 </div>
               </div>
             </div>

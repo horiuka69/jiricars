@@ -73,39 +73,10 @@ const Home = () => {
                 {t('home.hero.subtitle')}
               </motion.p>
               <motion.div variants={itemVariants} className="hero-actions">
-                <Link to="/inquiry" className="btn btn-primary">
-                  {t('home.hero.cta.inquiry')} <ArrowRight size={20} />
-                </Link>
-                <Link to="/listings" className="btn btn-outline">
-                  {t('home.hero.cta.marketplace')}
+                <Link to="/contact" className="btn btn-primary">
+                  {t('nav.contact')} <ArrowRight size={20} />
                 </Link>
               </motion.div>
-            </motion.div>
-            
-            <motion.div 
-              className="hero-visual"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-            >
-              <div className="glass-panel quick-stats-card animate-float">
-                <div className="badge-pulse"></div>
-                <div className="stat-header">
-                  <Star className="star-icon" size={24} />
-                  <h3>Premium Sourcing</h3>
-                </div>
-                <p className="stat-desc">Reliable vehicle transit & logistics across all EU countries with professional GPS tracking.</p>
-                <div className="stat-row">
-                  <div>
-                    <span className="stat-num">500+</span>
-                    <span className="stat-lbl">Cars Imported</span>
-                  </div>
-                  <div>
-                    <span className="stat-num">4.9/5</span>
-                    <span className="stat-lbl">Rating</span>
-                  </div>
-                </div>
-              </div>
             </motion.div>
           </div>
         </section>
