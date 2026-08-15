@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Fuel, Settings, Calendar, ArrowRight, Gauge, Disc, Plus, Trash2, X, ChevronLeft, ChevronRight, Image as ImageIcon, Upload } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
@@ -654,10 +655,10 @@ const Listings = () => {
                 </div>
 
                 {/* Inquire CTA */}
-                <a href={`/contact?inquiry=${encodeURIComponent(selectedCar.name)}`} className="btn btn-primary w-full" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', padding: '1rem' }}>
+                <Link to={`/contact?inquiry=${encodeURIComponent(selectedCar.name)}`} className="btn btn-primary w-full" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', padding: '1rem', textDecoration: 'none' }}>
                   <span>Mám zájem / Send Inquiry</span>
                   <ArrowRight size={18} />
-                </a>
+                </Link>
               </motion.div>
             </motion.div>
           )}
