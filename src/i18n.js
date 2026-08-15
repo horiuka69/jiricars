@@ -11,6 +11,7 @@ const resources = {
       "nav.rental": "Tow Truck Rental",
       "nav.reviews": "Reviews",
       "nav.contact": "Contact",
+      "nav.admin_inbox": "Inbox",
 
       "footer.desc": "Your premium automotive platform. Specialized vehicle imports, marketplace and professional tow truck rental.",
       "footer.rights": "All rights reserved.",
@@ -148,6 +149,7 @@ const resources = {
       "nav.rental": "Abschleppwagen mieten",
       "nav.reviews": "Bewertungen",
       "nav.contact": "Kontakt",
+      "nav.admin_inbox": "Inbox",
 
       "footer.desc": "Ihre Premium-Automobilplattform. Spezialisierte Fahrzeugimporte, Marktplatz und professionelle Abschleppwagen-Vermietung.",
       "footer.rights": "Alle Rechte vorbehalten.",
@@ -279,6 +281,7 @@ const resources = {
       "nav.rental": "Pronájem odtahovky",
       "nav.reviews": "Recenze",
       "nav.contact": "Kontakt",
+      "nav.admin_inbox": "Inbox",
 
       "footer.desc": "Vaše prémiová automobilová platforma. Specializovaný dovoz vozidel, tržiště a profesionální pronájem odtahových vozů.",
       "footer.rights": "Všechna práva vyhrazena.",

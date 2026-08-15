@@ -3,10 +3,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Globe, Car, ChevronDown, Menu, X } from 'lucide-react';
 import logoImg from '../assets/logo.jpg';
+import { useAdmin } from '../context/AdminContext';
 import './Navbar.css';
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
+  const { isAdmin } = useAdmin();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
@@ -49,6 +51,10 @@ const Navbar = () => {
     { path: '/reviews', labelKey: 'nav.reviews' },
     { path: '/contact', labelKey: 'nav.contact' },
   ];
+
+  if (isAdmin) {
+    navLinks.push({ path: '/admin-inbox', labelKey: 'nav.admin_inbox' });
+  }
 
   const languages = [
     { code: 'cs', label: 'CZ', flag: '🇨🇿' },
