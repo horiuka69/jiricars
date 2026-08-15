@@ -8,28 +8,23 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Resend API Key is not configured' });
   }
 
-  const { to, subject, body, replyToMessageId, conversationId } = req.body;
+  const { to, subject, body, replyToMessageId } = req.body;
   if (!to || !subject || !body) {
     return res.status(400).json({ error: 'Missing required fields (to, subject, body)' });
   }
+
+  const htmlBody = `<div style="font-family: sans-serif; line-height: 1.6; color: #1f2937; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px;">
+    <p>${body.replace(/\n/g, '<br />')}</p>
+    <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+    <p style="font-size: 0.85rem; color: #9ca3af;">Odesláno z administrace easyodtah.cz / Sent from easyodtah.cz admin.</p>
+  </div>`;
 
   const payload = {
     from: 'easyodtah.cz <info@easyodtah.cz>', // Verified domain sender
     to: to,
     subject: subject,
     text: body,
-    html: `<div style="font-family: sans-serif; line-height: 1.6; color: #1f2937; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px;">
-      <p>${body.replace(/\n/g, '<br />')}</p>
-      <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
-      ${conversationId ? `
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; text-align: center; margin: 15px 0;">
-          <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #475569;">Odpovězte na zprávu online / Answer this message online:</p>
-          <a href="https://easyodtah.cz/chat/${conversationId}" style="display: inline-block; background: #06b6d4; color: #ffffff; padding: 8px 18px; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: bold;">Otevřít konverzaci / Open Chat</a>
-        </div>
-        <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
-      ` : ''}
-      <p style="font-size: 0.85rem; color: #9ca3af;">Odesláno z administrace easyodtah.cz / Sent from easyodtah.cz admin.</p>
-    </div>`
+    html: htmlBody
   };
 
   if (replyToMessageId) {
@@ -50,6 +45,40 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Resend API Error:', data);
+      return res.status(response.status).json({ error: data.message || 'Failed to send email' });
+    }
+
+    // Save copy to Firestore using Google REST API
+    const projectId = process.env.VITE_FIREBASE_PROJECT_ID || 'easyodtah';
+    const firestorePayload = {
+      fields: {
+        messageId: { stringValue: data.id || '' },
+        inReplyTo: { stringValue: replyToMessageId || '' },
+        references: { stringValue: replyToMessageId || '' },
+        from: { stringValue: 'easyodtah.cz <info@easyodtah.cz>' },
+        to: { arrayValue: { values: [{ stringValue: to }] } },
+        replyTo: { stringValue: 'info@easyodtah.cz' },
+        subject: { stringValue: subject },
+        text: { stringValue: body },
+        html: { stringValue: htmlBody },
+        createdAt: { stringValue: new Date().toISOString() },
+        type: { stringValue: 'sent' }
+      }
+    };
+
+    try {
+      await fetch(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/emails`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(firestorePayload)
+      });
+    } catch (dbErr) {
+      console.error('Failed to log outbound email in Firestore:', dbErr);
+    }
+
     return res.status(response.status).json(data);
   } catch (error) {
     console.error('Error sending custom email:', error);

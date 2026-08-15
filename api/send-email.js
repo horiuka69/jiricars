@@ -1,10 +1,10 @@
-// API Route: Send Email via Resend
+// API Route: Send Email via Resend and save to Firestore
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { formType, name, email, phone, subject, message, conversationId } = req.body;
+  const { formType, name, email, phone, subject, message } = req.body;
 
   // Validate required inputs
   if (!name || !email) {
@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   }
 
   const resendApiKey = process.env.RESEND_API_KEY;
-  const toEmail = process.env.DESTINATION_EMAIL || 'info@easyodtah.cz';
+  const toEmail = process.env.DESTINATION_EMAIL || 'info@easyodtah.cz'; // fallback or env
 
   if (!resendApiKey) {
     console.error('Missing RESEND_API_KEY environment variable');
@@ -37,13 +37,6 @@ export default async function handler(req, res) {
     <p><strong>Message / Details:</strong></p>
     <div style="background: #f4f4f5; padding: 15px; border-radius: 8px; border: 1px solid #e4e4e7; white-space: pre-wrap;">${message || 'No message content provided.'}</div>
     <hr />
-    ${conversationId ? `
-      <div style="margin: 20px 0; padding: 15px; border-radius: 8px; border: 1px solid #06b6d4; background: #ecfeff; text-align: center;">
-        <p style="margin: 0 0 10px 0; font-weight: bold; color: #0891b2;">Spravovat konverzaci v administraci / Manage Chat:</p>
-        <a href="https://easyodtah.cz/admin-inbox?thread=${conversationId}" style="display: inline-block; padding: 10px 20px; color: #fff; background: #06b6d4; border-radius: 6px; text-decoration: none; font-weight: bold;">Otevřít chatovací vlákno / Open Chat Thread</a>
-      </div>
-      <hr />
-    ` : ''}
     <p style="font-size: 0.8rem; color: #71717a;">This is an automated notification from your website easyodtah.cz.</p>
   `;
 
@@ -68,6 +61,33 @@ export default async function handler(req, res) {
     if (!response.ok) {
       console.error('Resend API Error:', data);
       return res.status(response.status).json({ error: data.message || 'Failed to send email' });
+    }
+
+    // Save copy to Firestore using Google REST API
+    const projectId = process.env.VITE_FIREBASE_PROJECT_ID || 'easyodtah';
+    const firestorePayload = {
+      fields: {
+        messageId: { stringValue: data.id || '' },
+        from: { stringValue: 'easyodtah.cz <noreply@easyodtah.cz>' },
+        to: { arrayValue: { values: [{ stringValue: toEmail }] } },
+        replyTo: { stringValue: email },
+        subject: { stringValue: emailSubject },
+        text: { stringValue: `Form Type: ${formType || 'General'}\nName: ${name}\nEmail: ${email}\nPhone: ${phone || ''}\nMessage: ${message || ''}` },
+        html: { stringValue: htmlBody },
+        createdAt: { stringValue: new Date().toISOString() },
+        type: { stringValue: 'received' },
+        formType: { stringValue: formType || 'General' }
+      }
+    };
+
+    try {
+      await fetch(`https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/emails`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(firestorePayload)
+      });
+    } catch (dbErr) {
+      console.error('Failed to log form email in Firestore:', dbErr);
     }
 
     return res.status(200).json({ success: true, messageId: data.id });

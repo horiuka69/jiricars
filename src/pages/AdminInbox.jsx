@@ -2,51 +2,59 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../firebase';
-import { collection, onSnapshot, doc, updateDoc, arrayUnion, query } from 'firebase/firestore';
-import { Mail, Send, Inbox, Clock, CheckCircle2, AlertCircle, RefreshCw, X, Search, User, ShieldAlert, Phone } from 'lucide-react';
+import { collection, onSnapshot, query } from 'firebase/firestore';
+import { Mail, Send, Inbox, Clock, CheckCircle2, AlertCircle, RefreshCw, X, Search, User, ChevronDown, ChevronUp, CornerUpLeft, Filter, Phone, FileText } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
 import { useAdmin } from '../context/AdminContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './AdminInbox.css';
 
 const AdminInbox = () => {
   const { t } = useTranslation();
   const { isAdmin } = useAdmin();
   const navigate = useNavigate();
-  const location = useLocation();
   
-  // Real-time Firestore conversations list
-  const [conversations, setConversations] = useState([]);
+  // Real-time Firestore emails state
+  const [emails, setEmails] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
-  // Search query
+  // Search and Filter states
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // Selected conversation
-  const [selectedConv, setSelectedConv] = useState(null);
-  
-  // Reply text input
-  const [replyText, setReplyText] = useState('');
+  const [activeTab, setActiveTab] = useState('received'); // 'received' (inbox), 'sent' (replied/composed)
+  const [formFilter, setFormFilter] = useState('all'); // 'all', 'contact', 'rental', 'odtah', 'custom'
+
+  // Selected thread state
+  const [selectedThreadKey, setSelectedThreadKey] = useState(null);
+  const [expandedEmailId, setExpandedEmailId] = useState(null);
+
+  // Reply editor state
+  const [replyBody, setReplyBody] = useState('');
   const [sending, setSending] = useState(false);
   const [sendSuccess, setSendSuccess] = useState(false);
   const [sendError, setSendError] = useState('');
-  
-  const chatFeedEndRef = useRef(null);
 
-  // Redirect if not authorized
+  // Compose new email overlay state
+  const [showComposeModal, setShowComposeModal] = useState(false);
+  const [newMailTo, setNewMailTo] = useState('');
+  const [newMailSubject, setNewMailSubject] = useState('');
+  const [newMailBody, setNewMailBody] = useState('');
+
+  const chatEndRef = useRef(null);
+
+  // Redirect if not admin
   useEffect(() => {
     if (!isAdmin) {
       navigate('/');
     }
   }, [isAdmin, navigate]);
 
-  // Subscribe to real-time conversations list
+  // Subscribe to Firestore "emails" collection in real-time
   useEffect(() => {
     if (!isAdmin) return;
 
     setLoading(true);
-    const q = query(collection(db, 'conversations'));
+    const q = query(collection(db, 'emails'));
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const list = snapshot.docs.map(doc => ({
@@ -54,130 +62,263 @@ const AdminInbox = () => {
         ...doc.data()
       }));
       
-      // Sort conversations by lastMessageAt descending
-      list.sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt));
-      
-      setConversations(list);
+      setEmails(list);
       setLoading(false);
       setError('');
     }, (err) => {
       console.error(err);
-      setError('Nepodařilo se načíst konverzace z databáze Firestore. / Failed to subscribe to database.');
+      setError('Nepodařilo se připojit k databázi e-mailů. / Failed to subscribe to email database.');
       setLoading(false);
     });
 
     return () => unsubscribe();
   }, [isAdmin]);
 
-  // Auto scroll chat to bottom when conversation or message list changes
+  // Scroll details pane to bottom when selecting thread or message count changes
   useEffect(() => {
-    chatFeedEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [selectedConv?.messages]);
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [selectedThreadKey]);
 
-  // Sync selected conversation object when active list updates
-  useEffect(() => {
-    if (selectedConv && conversations.length > 0) {
-      const updated = conversations.find(c => c.id === selectedConv.id);
-      if (updated) {
-        setSelectedConv(updated);
-      }
+  // Helper clean subject function to group threads
+  const getCleanSubject = (subject) => {
+    if (!subject) return 'bez předmětu / no subject';
+    return subject
+      .replace(/^\[easyodtah\.cz\]\s*/i, '')
+      .replace(/^new form submission:\s*/i, '')
+      .replace(/^(re|fwd|fw|odpověď):\s*/i, '')
+      .trim();
+  };
+
+  // Extract customer email from form body or meta parameters
+  const extractCustomerEmail = (email) => {
+    if (email.replyTo) return email.replyTo;
+    
+    // Parse from body text
+    const bodyContent = email.text || email.html || '';
+    const emailRegex = /(?:Email:<\/strong>\s*|Email:\s*)([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i;
+    const match = bodyContent.match(emailRegex);
+    if (match) return match[1];
+
+    // Fallback to headers
+    if (email.from && !email.from.includes('easyodtah.cz')) {
+      return email.from;
     }
-  }, [conversations]);
-
-  // Auto-select conversation matching URL thread query parameter (?thread=ID)
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const threadId = params.get('thread');
-    if (threadId && conversations.length > 0) {
-      const matched = conversations.find(c => c.id === threadId);
-      if (matched) {
-        setSelectedConv(matched);
-      }
+    if (email.to && email.to.length > 0) {
+      const ext = email.to.find(r => !r.includes('easyodtah.cz'));
+      if (ext) return ext;
     }
-  }, [conversations, location]);
+    return 'info@easyodtah.cz';
+  };
 
+  // Group emails list into threads
+  const getGroupedThreads = () => {
+    const threads = {};
+
+    emails.forEach(email => {
+      const cleanSub = getCleanSubject(email.subject);
+      const customerEmail = extractCustomerEmail(email);
+      const groupKey = `${cleanSub}__${customerEmail}`;
+
+      if (!threads[groupKey]) {
+        threads[groupKey] = {
+          key: groupKey,
+          subject: cleanSub,
+          customerEmail: customerEmail,
+          emails: [],
+          lastMessageAt: email.createdAt,
+          formType: 'custom', // Default
+          customerName: 'Customer',
+          customerPhone: ''
+        };
+      }
+
+      threads[groupKey].emails.push(email);
+
+      // Extract form details if present
+      if (email.formType) {
+        threads[groupKey].formType = email.formType.toLowerCase();
+      }
+
+      // Try to extract name and phone from form text body
+      const bodyContent = email.text || email.html || '';
+      if (bodyContent) {
+        const nameMatch = bodyContent.match(/(?:Name:<\/strong>\s*|Name:\s*|Jméno:\s*)([^\r\n<]+)/i);
+        if (nameMatch) threads[groupKey].customerName = nameMatch[1].trim();
+
+        const phoneMatch = bodyContent.match(/(?:Phone:<\/strong>\s*|Phone:\s*|Telefon:\s*)([^\r\n<]+)/i);
+        if (phoneMatch) threads[groupKey].customerPhone = phoneMatch[1].trim();
+      }
+
+      // Sync latest message timestamp for order sorting
+      if (new Date(email.createdAt) > new Date(threads[groupKey].lastMessageAt)) {
+        threads[groupKey].lastMessageAt = email.createdAt;
+      }
+    });
+
+    // Sort emails in each thread chronologically (oldest at top, newest at bottom)
+    Object.values(threads).forEach(thread => {
+      thread.emails.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    });
+
+    // Sort threads list by latest message date descending
+    return Object.values(threads).sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt));
+  };
+
+  // Filter threads by tab and form type
+  const getFilteredThreads = () => {
+    const allThreads = getGroupedThreads();
+
+    return allThreads.filter(thread => {
+      const latestEmail = thread.emails[thread.emails.length - 1];
+      const isLatestReceived = latestEmail.type === 'received' || (latestEmail.to && latestEmail.to.some(r => r.includes('easyodtah.cz')));
+
+      // 1. Tab Filter
+      if (activeTab === 'received' && !isLatestReceived) return false;
+      if (activeTab === 'sent' && isLatestReceived) return false;
+
+      // 2. Form Type Filter
+      if (formFilter !== 'all') {
+        if (formFilter === 'custom' && thread.formType !== 'custom') return false;
+        if (formFilter !== 'custom' && thread.formType !== formFilter) return false;
+      }
+
+      // 3. Search Bar Filter
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        const matchesSubject = thread.subject.toLowerCase().includes(q);
+        const matchesEmail = thread.customerEmail.toLowerCase().includes(q);
+        const matchesName = thread.customerName.toLowerCase().includes(q);
+        const matchesPhone = thread.customerPhone.includes(q);
+        return matchesSubject || matchesEmail || matchesName || matchesPhone;
+      }
+
+      return true;
+    });
+  };
+
+  const activeThreads = getFilteredThreads();
+  const selectedThread = activeThreads.find(t => t.key === selectedThreadKey) || (selectedThreadKey ? getGroupedThreads().find(t => t.key === selectedThreadKey) : null);
+
+  // Set expanded email automatically to the latest email inside thread on first load
+  useEffect(() => {
+    if (selectedThread && selectedThread.emails.length > 0) {
+      setExpandedEmailId(selectedThread.emails[selectedThread.emails.length - 1].id);
+    }
+  }, [selectedThreadKey]);
+
+  // Dispatch custom reply email and auto-update thread
   const handleSendReply = async (e) => {
     e.preventDefault();
-    if (!replyText.trim() || sending || !selectedConv) return;
+    if (!replyBody.trim() || sending || !selectedThread) return;
 
     setSending(true);
     setSendSuccess(false);
     setSendError('');
-    
-    const messageId = Math.random().toString(36).substring(2, 9);
-    const timeNow = new Date().toISOString();
-    
-    const messagePayload = {
-      id: messageId,
-      sender: 'admin',
-      senderName: 'easyodtah.cz Podpora',
-      senderEmail: 'info@easyodtah.cz',
-      body: replyText,
-      timestamp: timeNow
-    };
+
+    const latestEmail = selectedThread.emails[selectedThread.emails.length - 1];
 
     try {
-      // 1. Write reply to Firestore document
-      const docRef = doc(db, 'conversations', selectedConv.id);
-      await updateDoc(docRef, {
-        messages: arrayUnion(messagePayload),
-        lastMessageAt: timeNow
-      });
-
-      // Keep reference to sent text before clearing it for the email
-      const sentContent = replyText;
-      setReplyText('');
-
-      // 2. Dispatch email to customer
       const res = await fetch('/api/send-custom-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          to: selectedConv.customerEmail,
-          subject: `Odpověď: ${selectedConv.subject}`,
-          body: sentContent,
-          conversationId: selectedConv.id // Include conversation link inside customer's email
+          to: selectedThread.customerEmail,
+          subject: `Re: ${latestEmail.subject}`,
+          body: replyBody,
+          replyToMessageId: latestEmail.messageId || ''
         })
       });
+
       const data = await res.json();
+
       if (res.ok) {
         setSendSuccess(true);
+        setReplyBody('');
         setTimeout(() => setSendSuccess(false), 2000);
       } else {
-        console.error("Email notify fail:", data.error);
-        setSendError('Zpráva uložena na chatu, ale e-mailové oznámení nebylo doručeno.');
+        setSendError(data.error || 'Failed to dispatch email.');
       }
     } catch (err) {
       console.error(err);
-      setSendError('Zpráva se uložila, ale nepodařilo se kontaktovat e-mailový server.');
+      setSendError('Failed to establish contact with mail server.');
     } finally {
       setSending(false);
     }
   };
 
-  // Helper search filter
-  const getFilteredConversations = () => {
-    if (!searchQuery) return conversations;
-    const q = searchQuery.toLowerCase();
-    return conversations.filter(c => 
-      c.customerName.toLowerCase().includes(q) ||
-      c.customerEmail.toLowerCase().includes(q) ||
-      c.subject.toLowerCase().includes(q) ||
-      (c.phone && c.phone.includes(q))
-    );
+  // Compose new outbound email
+  const handleSendNewMail = async (e) => {
+    e.preventDefault();
+    if (sending || !newMailTo || !newMailSubject || !newMailBody) return;
+
+    setSending(true);
+    setSendSuccess(false);
+    setSendError('');
+
+    try {
+      const res = await fetch('/api/send-custom-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          to: newMailTo,
+          subject: newMailSubject,
+          body: newMailBody
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setSendSuccess(true);
+        setNewMailTo('');
+        setNewMailSubject('');
+        setNewMailBody('');
+        setShowComposeModal(false);
+        setTimeout(() => setSendSuccess(false), 2000);
+      } else {
+        setSendError(data.error || 'Failed to dispatch email.');
+      }
+    } catch (err) {
+      console.error(err);
+      setSendError('Failed to establish contact with mail server.');
+    } finally {
+      setSending(false);
+    }
   };
 
-  if (!isAdmin) return null;
+  const getFormLabel = (type) => {
+    switch (type) {
+      case 'towing': return 'Odtah / Towing';
+      case 'rental': return 'Pronájem / Rental';
+      case 'contact': return 'Kontakt / Contact';
+      default: return 'Custom Email';
+    }
+  };
+
+  const getFormBadgeClass = (type) => {
+    switch (type) {
+      case 'towing': return 'badge-towing';
+      case 'rental': return 'badge-rental';
+      case 'contact': return 'badge-contact';
+      default: return 'badge-custom';
+    }
+  };
 
   return (
     <PageTransition>
       <section className="admin-inbox-page container">
         <div className="inbox-header-row">
-          <h1>Zprávy a Poptávky / Support Hub</h1>
-          <p>Real-time chatová komunikace se zákazníky a automatická zrcadlová e-mailová upozornění</p>
+          <div>
+            <h1>Pošta a Poptávky / Mail Support</h1>
+            <p>Gmail styl administrace propojený na Resend a Firestore databázi e-mailů</p>
+          </div>
+          <button className="btn btn-primary" onClick={() => setShowComposeModal(true)}>
+            <Mail size={16} style={{ marginRight: '6px' }} />
+            <span>Napsat e-mail / Compose</span>
+          </button>
         </div>
 
-        {/* Connection Errors */}
+        {/* Sync Errors */}
         {error && (
           <div className="inbox-error-card glass-panel" style={{ marginBottom: '1.5rem' }}>
             <AlertCircle size={20} />
@@ -193,11 +334,13 @@ const AdminInbox = () => {
           
           {/* Left Column: Conversations List */}
           <div className="conv-sidebar glass-panel">
+            
+            {/* Search Input */}
             <div className="sidebar-search">
               <Search size={16} />
               <input 
                 type="text" 
-                placeholder="Hledat zákazníka, poptávku... / Search..." 
+                placeholder="Hledat jméno, předmět, telefon..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -208,37 +351,64 @@ const AdminInbox = () => {
               )}
             </div>
 
+            {/* Form Type Filters */}
+            <div className="sidebar-filters">
+              <button className={`filter-pill ${formFilter === 'all' ? 'active' : ''}`} onClick={() => setFormFilter('all')}>All</button>
+              <button className={`filter-pill ${formFilter === 'towing' ? 'active' : ''}`} onClick={() => setFormFilter('towing')}>Odtah</button>
+              <button className={`filter-pill ${formFilter === 'rental' ? 'active' : ''}`} onClick={() => setFormFilter('rental')}>Pronájem</button>
+              <button className={`filter-pill ${formFilter === 'contact' ? 'active' : ''}`} onClick={() => setFormFilter('contact')}>Kontakt</button>
+              <button className={`filter-pill ${formFilter === 'custom' ? 'active' : ''}`} onClick={() => setFormFilter('custom')}>Custom</button>
+            </div>
+
+            {/* Tab Toggles */}
+            <div className="sidebar-tabs">
+              <button className={`sidebar-tab-btn ${activeTab === 'received' ? 'active' : ''}`} onClick={() => setActiveTab('received')}>
+                <Inbox size={14} />
+                <span>Doručené / Inbox</span>
+              </button>
+              <button className={`sidebar-tab-btn ${activeTab === 'sent' ? 'active' : ''}`} onClick={() => setActiveTab('sent')}>
+                <Send size={14} />
+                <span>Odeslané / Sent</span>
+              </button>
+            </div>
+
+            {/* Threads List */}
             <div className="sidebar-list">
               {loading ? (
                 <div className="list-status-info">
                   <RefreshCw size={20} className="spin" />
-                  <span>Načítám zprávy...</span>
+                  <span>Načítám konverzace...</span>
                 </div>
-              ) : getFilteredConversations().length === 0 ? (
+              ) : activeThreads.length === 0 ? (
                 <div className="list-status-info">
                   <span>Žádné aktivní konverzace / No threads found.</span>
                 </div>
               ) : (
-                getFilteredConversations().map((c) => {
-                  const isSelected = selectedConv && selectedConv.id === c.id;
-                  const latestMsg = c.messages[c.messages.length - 1];
+                activeThreads.map((thread) => {
+                  const isSelected = selectedThreadKey === thread.key;
+                  const latestMsg = thread.emails[thread.emails.length - 1];
+                  const emailCount = thread.emails.length;
                   
                   return (
                     <div 
-                      key={c.id} 
+                      key={thread.key} 
                       className={`conv-list-item ${isSelected ? 'active' : ''}`}
-                      onClick={() => { setSelectedConv(c); setSendError(''); }}
+                      onClick={() => setSelectedThreadKey(thread.key)}
                     >
-                      <div className="conv-item-meta">
-                        <span className="customer-name">{c.customerName}</span>
-                        <span className="msg-date">
-                          {new Date(c.lastMessageAt).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric' })}
+                      <div className="conv-item-top">
+                        <span className="conv-name">{thread.customerName}</span>
+                        <span className="conv-date">{new Date(thread.lastMessageAt).toLocaleDateString()}</span>
+                      </div>
+                      <div className="conv-subject-row">
+                        <span className="conv-subject">{thread.subject}</span>
+                        {emailCount > 1 && <span className="conv-badge">{emailCount}</span>}
+                      </div>
+                      <div className="conv-item-bottom">
+                        <span className="conv-snippet">{latestMsg.text || 'Zpráva bez textu / No plain text'}</span>
+                        <span className={`form-badge-pill ${getFormBadgeClass(thread.formType)}`}>
+                          {getFormLabel(thread.formType)}
                         </span>
                       </div>
-                      <span className="conv-subject">{c.subject}</span>
-                      <p className="latest-msg-preview">
-                        {latestMsg ? latestMsg.body : 'Bez zpráv'}
-                      </p>
                     </div>
                   );
                 })
@@ -246,87 +416,232 @@ const AdminInbox = () => {
             </div>
           </div>
 
-          {/* Right Column: Chat Screen */}
-          <div className="chat-feed-view glass-panel">
-            {selectedConv ? (
-              <div className="active-chat-wrapper">
-                {/* Active Chat Header */}
-                <div className="active-chat-header">
-                  <div className="client-profile">
-                    <User size={20} className="profile-icon" />
-                    <div>
-                      <h3>{selectedConv.customerName}</h3>
-                      <span className="client-email">{selectedConv.customerEmail}</span>
-                      {selectedConv.phone && (
-                        <span className="client-phone"><Phone size={11} /> {selectedConv.phone}</span>
+          {/* Right Column: Message Thread Details */}
+          <div className="chat-feed-container glass-panel">
+            {selectedThread ? (
+              <>
+                {/* Thread Header Info Card */}
+                <div className="chat-header-info">
+                  <div className="customer-avatar">
+                    <User size={20} />
+                  </div>
+                  <div className="header-meta">
+                    <h3>{selectedThread.customerName}</h3>
+                    <p style={{ color: 'var(--text-main)', fontSize: '0.85rem' }}>
+                      <strong>Email:</strong> {selectedThread.customerEmail}
+                      {selectedThread.customerPhone && (
+                        <>
+                          <span style={{ margin: '0 0.5rem' }}>|</span>
+                          <strong>Telefon:</strong> {selectedThread.customerPhone}
+                        </>
                       )}
-                    </div>
+                    </p>
                   </div>
-                  <div className="chat-subject-badge">
-                    <span>{selectedConv.subject}</span>
-                  </div>
+                  <span className={`form-badge-pill ${getFormBadgeClass(selectedThread.formType)}`} style={{ marginLeft: 'auto' }}>
+                    {getFormLabel(selectedThread.formType)}
+                  </span>
                 </div>
 
-                {/* Real-time Message Feed */}
-                <div className="feed-messages-viewport">
-                  <div className="chat-start-badge">
-                    <Clock size={12} /> Založeno: {new Date(selectedConv.messages[0].timestamp).toLocaleString()}
-                  </div>
+                {/* Messages Log Stack */}
+                <div className="messages-scroller" style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  {selectedThread.emails.map((email) => {
+                    const isExpanded = expandedEmailId === email.id;
+                    const isAdminSender = email.type === 'sent';
 
-                  {selectedConv.messages.map((msg, index) => {
-                    const isAdminMsg = msg.sender === 'admin';
                     return (
-                      <div key={msg.id || index} className={`feed-bubble-row ${isAdminMsg ? 'admin-row' : 'customer-row'}`}>
-                        <div className={`feed-bubble ${isAdminMsg ? 'admin-bubble' : 'customer-bubble'}`}>
-                          <div className="feed-bubble-text">{msg.body}</div>
-                          <div className="feed-bubble-time">
-                            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <div 
+                        key={email.id} 
+                        className={`message-card ${isAdminSender ? 'sent-by-admin' : 'received-by-admin'}`}
+                        style={{
+                          border: isExpanded ? '1px solid var(--secondary-color)' : '1px solid var(--glass-border)',
+                          borderRadius: '12px',
+                          overflow: 'hidden'
+                        }}
+                      >
+                        {/* Collapsed Card Header */}
+                        <div 
+                          className="msg-card-header"
+                          onClick={() => setExpandedEmailId(expandedEmailId === email.id ? null : email.id)}
+                          style={{
+                            padding: '0.75rem 1rem',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            cursor: 'pointer',
+                            background: 'rgba(255, 255, 255, 0.01)'
+                          }}
+                        >
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem', fontSize: '0.85rem', textAlign: 'left' }}>
+                            <span style={{ color: 'var(--text-light)', fontWeight: 'bold' }}>
+                              {isAdminSender ? 'Easyodtah Podpora (info@easyodtah.cz)' : email.from}
+                            </span>
+                            <span style={{ color: 'var(--text-main)', fontSize: '0.8rem' }}>
+                              Příjemce: {Array.isArray(email.to) ? email.to.join(', ') : email.to}
+                            </span>
+                          </div>
+                          
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                              <Clock size={12} /> {new Date(email.createdAt).toLocaleString()}
+                            </span>
+                            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
                           </div>
                         </div>
+
+                        {/* Expanded Body Frame */}
+                        {isExpanded && (
+                          <div style={{ padding: '1.25rem', borderTop: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.12)', textAlign: 'left' }}>
+                            {email.html ? (
+                              <iframe 
+                                srcDoc={email.html} 
+                                title={`EmailBody-${email.id}`}
+                                style={{ width: '100%', height: '320px', border: '1px solid var(--glass-border)', borderRadius: '8px', background: '#fff' }}
+                              />
+                            ) : (
+                              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)', maxHeight: '320px', overflowY: 'auto', whiteSpace: 'pre-wrap', color: 'var(--text-main)', fontSize: '0.9rem', lineHeight: '1.5' }}>
+                                {email.text || 'Bez textu / No content'}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
-                  <div ref={chatFeedEndRef} />
+                  <div ref={chatEndRef} />
                 </div>
 
-                {/* Reply Footer Input */}
-                <form onSubmit={handleSendReply} className="feed-reply-footer">
+                {/* Reply Form Editor Area */}
+                <div className="reply-editor-box" style={{ borderTop: '1px solid var(--glass-border)', padding: '1.5rem', background: 'rgba(255,255,255,0.01)' }}>
                   {sendSuccess && (
-                    <div className="reply-success-bar">
-                      <CheckCircle2 size={14} /> Odpověď uložena a e-mail odeslán! / Reply dispatched.
-                    </div>
-                  )}
-                  {sendError && (
-                    <div className="reply-error-bar">
-                      <ShieldAlert size={14} /> {sendError}
+                    <div className="send-success-notice" style={{ marginBottom: '1rem' }}>
+                      <CheckCircle2 size={16} />
+                      <span>Odpověď byla úspěšně odeslána a uložena! / Reply sent!</span>
                     </div>
                   )}
 
-                  <div className="reply-input-row">
-                    <input 
-                      type="text" 
-                      placeholder="Napište zákazníkovi odpověď (odešle se také na e-mail)..."
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                      disabled={sending}
-                      required
-                    />
-                    <button type="submit" className="reply-send-btn btn-primary" disabled={sending || !replyText.trim()}>
-                      {sending ? <RefreshCw size={18} className="spin" /> : <Send size={18} />}
-                    </button>
-                  </div>
-                </form>
-              </div>
+                  {sendError && (
+                    <div className="send-error-notice" style={{ marginBottom: '1rem' }}>
+                      <AlertCircle size={16} />
+                      <span>{sendError}</span>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleSendReply} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ position: 'relative' }}>
+                      <textarea
+                        required
+                        rows="4"
+                        placeholder="Napište rychlou odpověď zákazníkovi... / Type your reply..."
+                        value={replyBody}
+                        onChange={(e) => setReplyBody(e.target.value)}
+                        style={{
+                          width: '100%',
+                          background: 'rgba(255, 255, 255, 0.02)',
+                          border: '1px solid var(--glass-border)',
+                          borderRadius: '10px',
+                          color: 'var(--text-light)',
+                          padding: '0.8rem 1rem',
+                          fontFamily: 'inherit',
+                          fontSize: '0.95rem',
+                          outline: 'none',
+                          boxSizing: 'border-box'
+                        }}
+                      ></textarea>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text-main)' }}>
+                        Odpovídáte z: <strong style={{ color: 'var(--secondary-color)' }}>info@easyodtah.cz</strong>
+                      </span>
+                      
+                      <button type="submit" className="btn btn-primary" disabled={sending || !replyBody.trim()} style={{ padding: '0.6rem 2rem' }}>
+                        {sending ? 'Odesílám...' : (
+                          <>
+                            <CornerUpLeft size={14} style={{ marginRight: '6px' }} />
+                            <span>Odeslat odpověď / Send Reply</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </>
             ) : (
-              <div className="no-chat-selected">
-                <Mail size={44} style={{ color: 'var(--text-main)', opacity: 0.5, marginBottom: '1rem' }} />
-                <h3>Žádná konverzace není vybrána</h3>
-                <p>Kliknutím na položku v levém panelu načtěte chat a detaily poptávky.</p>
+              <div className="empty-chat-feed">
+                <Mail size={48} style={{ color: 'var(--text-main)', opacity: 0.3, marginBottom: '1rem' }} />
+                <h3>Žádná vybraná konverzace</h3>
+                <p>Vyberte zprávy nebo poptávku v levém panelu k zobrazení historie.</p>
               </div>
             )}
           </div>
-
         </div>
+
+        {/* Compose New Email Overlay Modal */}
+        <AnimatePresence>
+          {showComposeModal && (
+            <div className="email-detail-overlay" onClick={() => setShowComposeModal(false)}>
+              <div className="email-detail-card glass-panel" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '600px' }}>
+                <button className="close-detail-modal-btn" onClick={() => setShowComposeModal(false)}>
+                  <X size={20} />
+                </button>
+                
+                <h3 style={{ margin: '0 0 1.5rem 0', color: 'var(--text-light)' }}>Napsat novou zprávu / Compose Email</h3>
+
+                {sendError && (
+                  <div className="send-error-notice" style={{ marginBottom: '1.5rem' }}>
+                    <AlertCircle size={16} />
+                    <span>{sendError}</span>
+                  </div>
+                )}
+                
+                <form onSubmit={handleSendNewMail} className="compose-form">
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '1.25rem' }}>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-light)', textTransform: 'uppercase', fontWeight: 600 }}>Příjemce / To</label>
+                    <input 
+                      type="email" 
+                      required 
+                      placeholder="customer@email.cz" 
+                      value={newMailTo} 
+                      onChange={(e) => setNewMailTo(e.target.value)}
+                      style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--glass-border)', color: 'var(--text-light)', padding: '0.75rem', borderRadius: '10px', outline: 'none' }}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '1.25rem' }}>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-light)', textTransform: 'uppercase', fontWeight: 600 }}>Předmět / Subject</label>
+                    <input 
+                      type="text" 
+                      required 
+                      placeholder="e.g. Nabídka odtahu / Towing Quote" 
+                      value={newMailSubject} 
+                      onChange={(e) => setNewMailSubject(e.target.value)}
+                      style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--glass-border)', color: 'var(--text-light)', padding: '0.75rem', borderRadius: '10px', outline: 'none' }}
+                    />
+                  </div>
+
+                  <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', marginBottom: '1.5rem' }}>
+                    <label style={{ fontSize: '0.85rem', color: 'var(--text-light)', textTransform: 'uppercase', fontWeight: 600 }}>Zpráva / Body</label>
+                    <textarea 
+                      required 
+                      rows="8" 
+                      placeholder="Dobrý den..." 
+                      value={newMailBody} 
+                      onChange={(e) => setNewMailBody(e.target.value)}
+                      style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid var(--glass-border)', color: 'var(--text-light)', padding: '0.75rem', borderRadius: '10px', outline: 'none', fontFamily: 'inherit', fontSize: '0.95rem' }}
+                    ></textarea>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button type="submit" className="btn btn-primary" disabled={sending} style={{ padding: '0.6rem 2.5rem' }}>
+                      {sending ? 'Odesílám...' : 'Odeslat / Send'}
+                    </button>
+                    <button type="button" className="btn" onClick={() => setShowComposeModal(false)}>Zrušit / Cancel</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </AnimatePresence>
       </section>
     </PageTransition>
   );
