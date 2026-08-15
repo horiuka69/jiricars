@@ -114,6 +114,7 @@ const AdminInbox = () => {
           html: email.html || '',
           createdAt: email.created_at || new Date().toISOString(),
           type: isFormNotification ? 'received' : 'sent',
+          resendType: 'sent',
           formType: formType
         });
       }
@@ -132,6 +133,7 @@ const AdminInbox = () => {
           html: email.html || '',
           createdAt: email.created_at || new Date().toISOString(),
           type: 'received',
+          resendType: 'received',
           formType: 'custom'
         });
       }
@@ -185,15 +187,16 @@ const AdminInbox = () => {
     return 'info@easyodtah.cz';
   };
 
-  const loadEmailDetails = async (email) => {
+  const loadEmailDetails = async (email, forceExpand = false) => {
     // If it's already expanded, collapse it
-    if (expandedEmailId === email.id) {
+    if (expandedEmailId === email.id && !forceExpand) {
       setExpandedEmailId(null);
       return;
     }
 
-    // If it has HTML or text directly in the Firestore doc, no need to fetch
-    if (email.html || email.text) {
+    // Check if we have actual text/html content
+    const hasContent = (email.html && email.html.trim().length > 0) || (email.text && email.text.trim().length > 0);
+    if (hasContent) {
       setExpandedEmailId(email.id);
       return;
     }
@@ -204,10 +207,10 @@ const AdminInbox = () => {
       return;
     }
 
-    // Otherwise, fetch it on-demand from Resend
+    // Otherwise, fetch it on-demand from Resend using its API endpoint type
     setDetailLoadingId(email.id);
     try {
-      const res = await fetch(`/api/get-email?id=${email.messageId || email.id}&type=${email.type || 'sent'}`);
+      const res = await fetch(`/api/get-email?id=${email.messageId || email.id}&type=${email.resendType || 'sent'}`);
       const data = await res.json();
       if (res.ok) {
         setEmailDetailsCache(prev => ({ ...prev, [email.id]: data }));
@@ -310,7 +313,8 @@ const AdminInbox = () => {
   // Set expanded email automatically to the latest email inside thread on first load
   useEffect(() => {
     if (selectedThread && selectedThread.emails.length > 0) {
-      setExpandedEmailId(selectedThread.emails[selectedThread.emails.length - 1].id);
+      const latestEmail = selectedThread.emails[selectedThread.emails.length - 1];
+      loadEmailDetails(latestEmail, true);
     }
   }, [selectedThreadKey]);
 

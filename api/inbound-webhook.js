@@ -29,6 +29,7 @@ export default async function handler(req, res) {
         html: { stringValue: email.html || '' },
         createdAt: { stringValue: email.created_at || new Date().toISOString() },
         type: { stringValue: 'received' },
+        resendType: { stringValue: 'received' },
         replyTo: { stringValue: email.from || '' }
       }
     };

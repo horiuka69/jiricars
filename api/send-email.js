@@ -76,6 +76,7 @@ export default async function handler(req, res) {
         html: { stringValue: htmlBody },
         createdAt: { stringValue: new Date().toISOString() },
         type: { stringValue: 'received' },
+        resendType: { stringValue: 'sent' },
         formType: { stringValue: formType || 'General' }
       }
     };

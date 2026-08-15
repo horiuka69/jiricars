@@ -65,7 +65,8 @@ export default async function handler(req, res) {
         text: { stringValue: body },
         html: { stringValue: htmlBody },
         createdAt: { stringValue: new Date().toISOString() },
-        type: { stringValue: 'sent' }
+        type: { stringValue: 'sent' },
+        resendType: { stringValue: 'sent' }
       }
     };
 
