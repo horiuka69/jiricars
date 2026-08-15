@@ -253,3 +253,47 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
+/* Modal & Carousel styles */
+.car-detail-modal-overlay {
+  animation: fadeIn 0.25s ease-out;
+}
+
+.car-detail-modal {
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.close-detail-modal-btn {
+  transition: all 0.2s ease !important;
+}
+
+.close-detail-modal-btn:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: var(--secondary-color) !important;
+  transform: scale(1.05);
+}
+
+.carousel-control-btn {
+  transition: all 0.2s ease !important;
+}
+
+.carousel-control-btn:hover {
+  background: rgba(6, 182, 212, 0.8) !important;
+  border-color: var(--secondary-color) !important;
+  transform: translateY(-50%) scale(1.05) !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: scale(0.9) translateY(20px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.image-count-badge {
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+
