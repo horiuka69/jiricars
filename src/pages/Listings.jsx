@@ -82,56 +82,7 @@ const Listings = () => {
         id: doc.id,
         ...doc.data()
       }));
-
-      // Seed initial listings if collection is empty
-      if (fetchedCars.length === 0) {
-        const initialCars = [
-          {
-            brand: "BMW",
-            name: "BMW M3 Competition",
-            price: 1850000,
-            year: "2021",
-            mileage: "24 000 km",
-            transmission: "Automatic",
-            fuel: "Petrol",
-            power: "510 HP",
-            description: "High-performance sports sedan with Competition package, premium leather interior, carbon fiber trims, and active dampers. Complete service history, accident-free, garage stored.",
-            image: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=1200&auto=format&fit=crop",
-            images: ["https://images.unsplash.com/photo-1617814076367-b759c7d7e738?q=80&w=1200&auto=format&fit=crop"]
-          },
-          {
-            brand: "Audi",
-            name: "Audi RS6 Avant",
-            price: 2200000,
-            year: "2020",
-            mileage: "45 000 km",
-            transmission: "Automatic",
-            fuel: "Petrol",
-            power: "600 HP",
-            description: "Twin-turbo V8 super wagon with massive power and everyday utility. Fully loaded with panoramic roof, premium Bang & Olufsen sound system, matrix LED lights, and custom black optik package.",
-            image: "https://images.unsplash.com/photo-1606152421802-db97b9c7a11b?q=80&w=1200&auto=format&fit=crop",
-            images: ["https://images.unsplash.com/photo-1606152421802-db97b9c7a11b?q=80&w=1200&auto=format&fit=crop"]
-          },
-          {
-            brand: "Škoda",
-            name: "Škoda Superb L&K",
-            price: 850000,
-            year: "2022",
-            mileage: "15 000 km",
-            transmission: "Automatic",
-            fuel: "Diesel",
-            power: "200 HP",
-            description: "Premium Laurin & Klement edition offering superb passenger space and comfort. Featuring ventilated leather seats, virtual cockpit, Canton sound system, adaptive cruise control, and dynamic chassis control.",
-            image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1200&auto=format&fit=crop",
-            images: ["https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=1200&auto=format&fit=crop"]
-          }
-        ];
-        initialCars.forEach(async (car) => {
-          await addDoc(collection(db, 'listings'), car);
-        });
-      } else {
-        setCarsList(fetchedCars);
-      }
+      setCarsList(fetchedCars);
       setLoading(false);
     }, (error) => {
       console.error("Firestore listings subscription error:", error);
