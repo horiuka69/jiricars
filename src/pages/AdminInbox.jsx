@@ -29,6 +29,7 @@ const AdminInbox = () => {
   const [sendLoading, setSendLoading] = useState(false);
   const [sendSuccess, setSendSuccess] = useState(false);
   const [sendError, setSendError] = useState('');
+  const [replyToMessageId, setReplyToMessageId] = useState('');
 
   // Selected email for detail view modal
   const [selectedEmail, setSelectedEmail] = useState(null);
@@ -128,7 +129,8 @@ const AdminInbox = () => {
         body: JSON.stringify({
           to: composeTo,
           subject: composeSubject,
-          body: composeBody
+          body: composeBody,
+          replyToMessageId: replyToMessageId
         })
       });
       const data = await res.json();
@@ -138,6 +140,7 @@ const AdminInbox = () => {
         setComposeTo('');
         setComposeSubject('');
         setComposeBody('');
+        setReplyToMessageId('');
         // Return to sent tab after delay
         setTimeout(() => {
           setSendSuccess(false);
@@ -154,9 +157,16 @@ const AdminInbox = () => {
     }
   };
 
-  const handleReply = (emailTo) => {
+  const handleReply = (emailTo, originalMsgId, originalSubject) => {
     setComposeTo(emailTo);
-    setComposeSubject('Re: Website Inquiry');
+    
+    // Strip "Re: " if already present to avoid duplicate prefixes, then prepend it
+    const cleanSubject = originalSubject.toLowerCase().startsWith('re:') 
+      ? originalSubject 
+      : `Re: ${originalSubject}`;
+      
+    setComposeSubject(cleanSubject);
+    setReplyToMessageId(originalMsgId || '');
     setActiveTab('compose');
   };
 
@@ -431,8 +441,10 @@ const AdminInbox = () => {
                   <button 
                     className="btn btn-primary" 
                     onClick={() => {
-                      const replyTo = Array.isArray(selectedEmail.to) ? selectedEmail.to[0] : (selectedEmail.from || '');
-                      handleReply(replyTo);
+                      const replyTo = selectedEmail.from && selectedEmail.from.includes('easyodtah.cz') 
+                        ? (Array.isArray(selectedEmail.to) ? selectedEmail.to[0] : selectedEmail.to)
+                        : (selectedEmail.from || '');
+                      handleReply(replyTo, emailDetail ? emailDetail.message_id : '', selectedEmail.subject);
                       setSelectedEmail(null);
                     }}
                   >
