@@ -11,6 +11,8 @@ const Reviews = () => {
   const { t } = useTranslation();
   const [showSubmitForm, setShowSubmitForm] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [rating, setRating] = useState(5);
   const [name, setName] = useState('');
   const [comment, setComment] = useState('');
@@ -65,6 +67,10 @@ const Reviews = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setErrorMessage('');
+
     if (name && comment) {
       const newReview = {
         name,
@@ -73,7 +79,13 @@ const Reviews = () => {
         comment
       };
       try {
-        await addDoc(collection(db, 'reviews'), newReview);
+        const writePromise = addDoc(collection(db, 'reviews'), newReview);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Firebase write timeout')), 6000)
+        );
+        
+        await Promise.race([writePromise, timeoutPromise]);
+
         setIsSubmitted(true);
         setTimeout(() => {
           setIsSubmitted(false);
@@ -84,6 +96,9 @@ const Reviews = () => {
         }, 3000);
       } catch (error) {
         console.error("Error adding review to Firestore: ", error);
+        setErrorMessage(t('reviews.error') || 'Error submitting review. Please verify your internet connection or Firebase setup.');
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
@@ -202,8 +217,13 @@ const Reviews = () => {
                       onChange={(e) => setComment(e.target.value)}
                     ></textarea>
                   </div>
-                  <button type="submit" className="btn btn-primary">
-                    {t('reviews.form.submit')}
+                  {errorMessage && (
+                    <div className="error-message-box" style={{ color: '#ef4444', marginBottom: '1.5rem', fontSize: '0.9rem', background: 'rgba(239, 68, 68, 0.08)', padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                      {errorMessage}
+                    </div>
+                  )}
+                  <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+                    {isSubmitting ? t('reviews.submitting') : t('reviews.form.submit')}
                   </button>
                 </form>
               )}

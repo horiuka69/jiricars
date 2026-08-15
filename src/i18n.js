@@ -124,6 +124,8 @@ const resources = {
       "reviews.form.comment": "Comment",
       "reviews.form.submit": "Submit Review",
       "reviews.success": "Thank you! Your review has been submitted for moderation.",
+      "reviews.submitting": "Submitting review...",
+      "reviews.error": "Failed to submit review. Please check your internet connection and Firebase rules settings.",
 
       // Contact Page
       "contact.title": "Get in Touch",
@@ -253,6 +255,8 @@ const resources = {
       "reviews.form.comment": "Kommentar",
       "reviews.form.submit": "Absenden",
       "reviews.success": "Vielen Dank! Ihre Bewertung wurde zur Prüfung eingereicht.",
+      "reviews.submitting": "Wird gesendet...",
+      "reviews.error": "Fehler beim Senden der Bewertung. Bitte überprüfen Sie Ihre Internetverbindung und die Firebase-Regeln.",
 
       "contact.title": "Kontaktieren Sie uns",
       "contact.subtitle": "Haben Sie Fragen? Kontaktieren Sie uns hier.",
@@ -381,6 +385,8 @@ const resources = {
       "reviews.form.comment": "Komentář",
       "reviews.form.submit": "Odeslat hodnocení",
       "reviews.success": "Děkujeme! Vaše hodnocení bylo odesláno ke schválení.",
+      "reviews.submitting": "Odesílám hodnocení...",
+      "reviews.error": "Chyba při odesílání hodnocení. Zkontrolujte prosím připojení k internetu a nastavení pravidel Firebase (Firestore Rules).",
 
       "contact.title": "Kontaktujte nás",
       "contact.subtitle": "Máte otázky? Kontaktujte nás zde.",
