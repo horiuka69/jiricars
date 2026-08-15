@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, MessageSquarePlus, User, CheckCircle2 } from 'lucide-react';
+import { Star, MessageSquarePlus, User, CheckCircle2, Trash2 } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
 import { db } from '../firebase';
-import { collection, addDoc, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
+import { useAdmin } from '../context/AdminContext';
 import './Reviews.css';
 
 const Reviews = () => {
   const { t } = useTranslation();
+  const { isAdmin } = useAdmin();
   const [showSubmitForm, setShowSubmitForm] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -99,6 +101,16 @@ const Reviews = () => {
         setErrorMessage(t('reviews.error') || 'Error submitting review. Please verify your internet connection or Firebase setup.');
       } finally {
         setIsSubmitting(false);
+      }
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (window.confirm("Opravdu chcete smazat toto hodnocení? / Are you sure you want to delete this review?")) {
+      try {
+        await deleteDoc(doc(db, 'reviews', reviewId));
+      } catch (error) {
+        console.error("Error deleting review:", error);
       }
     }
   };
@@ -251,8 +263,38 @@ const Reviews = () => {
                     <span className="review-date">{review.date}</span>
                   </div>
                 </div>
-                <div className="review-card-stars">
-                  {renderStars(review.rating)}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <div className="review-card-stars">
+                    {renderStars(review.rating)}
+                  </div>
+                  {isAdmin && (
+                    <button 
+                      onClick={() => handleDeleteReview(review.id)}
+                      style={{ 
+                        background: 'rgba(239, 68, 68, 0.1)', 
+                        border: '1px solid rgba(239, 68, 68, 0.2)', 
+                        color: '#ef4444', 
+                        cursor: 'pointer', 
+                        padding: '6px', 
+                        borderRadius: '6px', 
+                        display: 'inline-flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+                        e.currentTarget.style.transform = 'scale(1.05)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }}
+                      title="Smazat / Delete"
+                    >
+                      <Trash2 size={15} />
+                    </button>
+                  )}
                 </div>
               </div>
               <p className="review-comment">{review.comment}</p>

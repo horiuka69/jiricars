@@ -10,10 +10,12 @@ import TowingServices from './pages/TowingServices';
 import Reviews from './pages/Reviews';
 import Contact from './pages/Contact';
 import { AnimatePresence } from 'framer-motion';
+import { AdminProvider } from './context/AdminContext';
+import LoginModal from './components/LoginModal';
 
 function App() {
   return (
-    <>
+    <AdminProvider>
       <Navbar />
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
         <AnimatePresence mode="wait">
@@ -29,7 +31,8 @@ function App() {
         </AnimatePresence>
       </main>
       <Footer />
-    </>
+      <LoginModal />
+    </AdminProvider>
   );
 }
 

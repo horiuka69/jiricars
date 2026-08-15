@@ -208,3 +208,48 @@
     align-items: flex-start;
   }
 }
+
+/* Add Listing Form Styles */
+.add-listing-drawer {
+  background: rgba(18, 22, 33, 0.75);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+.add-listing-form .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+.add-listing-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.add-listing-form input,
+.add-listing-form select {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--glass-border);
+  color: var(--text-light);
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.add-listing-form input:focus,
+.add-listing-form select:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+}
+

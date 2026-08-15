@@ -1,11 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Car, Phone, Mail, MapPin } from 'lucide-react';
+import { useAdmin } from '../context/AdminContext';
 import './Footer.css';
 
 const Footer = () => {
   const { t } = useTranslation();
+  const { setLoginModalOpen, isAdmin } = useAdmin();
+  const [clickCount, setClickCount] = useState(0);
+
+  const handleCopyrightClick = () => {
+    setClickCount(prev => {
+      const next = prev + 1;
+      if (next >= 5) {
+        setLoginModalOpen(true);
+        return 0;
+      }
+      return next;
+    });
+  };
 
   return (
     <footer className="footer">
@@ -54,7 +68,10 @@ const Footer = () => {
       
       <div className="footer-bottom">
         <div className="container footer-bottom-inner">
-          <p>&copy; {new Date().getFullYear()} easyodtah.cz. {t('footer.rights')}</p>
+          <p onClick={handleCopyrightClick} style={{ cursor: 'default', userSelect: 'none' }}>
+            &copy; {new Date().getFullYear()} easyodtah.cz. {t('footer.rights')}
+            {isAdmin && <span style={{ color: 'var(--secondary-color)', marginLeft: '10px', fontSize: '0.8rem', fontWeight: 'bold' }}>(ADMIN MODE ACTIVE)</span>}
+          </p>
         </div>
       </div>
     </footer>
