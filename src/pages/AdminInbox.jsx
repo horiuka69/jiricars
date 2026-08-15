@@ -29,6 +29,8 @@ const AdminInbox = () => {
 
   // Selected email for detail view modal
   const [selectedEmail, setSelectedEmail] = useState(null);
+  const [emailDetail, setEmailDetail] = useState(null);
+  const [emailDetailLoading, setEmailDetailLoading] = useState(false);
 
   // Redirect if not authorized
   useEffect(() => {
@@ -42,20 +44,39 @@ const AdminInbox = () => {
     setLoading(true);
     setError('');
     try {
-      const endpoint = activeTab === 'received' ? '/api/list-received-emails' : '/api/list-sent-emails';
-      const res = await fetch(endpoint);
-      const data = await res.json();
+      // Fetch sent logs
+      const sentRes = await fetch('/api/list-sent-emails');
+      const sentData = await sentRes.json();
       
-      if (res.ok) {
-        // Resend returns { data: [...] }
-        const list = data.data || [];
-        if (activeTab === 'received') {
-          setReceivedEmails(list);
-        } else {
-          setSentEmails(list);
-        }
+      // Fetch actual inbound logs if any
+      const receivedRes = await fetch('/api/list-received-emails');
+      const receivedData = await receivedRes.json();
+      
+      if (sentRes.ok) {
+        const rawSentList = sentData.data || [];
+        const rawReceivedList = receivedData.data || [];
+        
+        // Filter: If recipient contains easyodtah.cz, classify it as received (form notifications)
+        const filteredReceived = [
+          ...rawReceivedList,
+          ...rawSentList.filter(email => 
+            email.to && email.to.some(recipient => recipient.includes('easyodtah.cz'))
+          )
+        ];
+
+        // Filter: If recipient is NOT on easyodtah.cz, classify it as sent
+        const filteredSent = rawSentList.filter(email => 
+          !email.to || !email.to.some(recipient => recipient.includes('easyodtah.cz'))
+        );
+        
+        // Sort both by created_at desc
+        filteredReceived.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        filteredSent.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        setReceivedEmails(filteredReceived);
+        setSentEmails(filteredSent);
       } else {
-        setError(data.error || 'Failed to fetch email logs. Check Vercel key environment variables.');
+        setError(sentData.error || 'Failed to fetch email logs. Check Vercel key environment variables.');
       }
     } catch (err) {
       console.error(err);
@@ -66,10 +87,29 @@ const AdminInbox = () => {
   };
 
   useEffect(() => {
-    if (isAdmin && (activeTab === 'sent' || activeTab === 'received')) {
+    if (isAdmin) {
       fetchEmails();
     }
   }, [activeTab, isAdmin]);
+
+  const handleEmailClick = async (email) => {
+    setSelectedEmail(email);
+    setEmailDetailLoading(true);
+    setEmailDetail(null);
+    try {
+      const res = await fetch(`/api/get-email?id=${email.id}`);
+      const data = await res.json();
+      if (res.ok) {
+        setEmailDetail(data);
+      } else {
+        console.error("Failed to load email details:", data.error);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setEmailDetailLoading(false);
+    }
+  };
 
   const handleSendCustomEmail = async (e) => {
     e.preventDefault();
@@ -251,7 +291,7 @@ const AdminInbox = () => {
                         <div className="empty-logs">Žádné odeslané e-maily / No sent emails found.</div>
                       ) : (
                         sentEmails.map((email) => (
-                          <div key={email.id} className="email-log-item" onClick={() => setSelectedEmail(email)}>
+                          <div key={email.id} className="email-log-item" onClick={() => handleEmailClick(email)}>
                             <div className="log-main-info">
                               <span className="log-recipient"><strong>Komu / To:</strong> {email.to.join(', ')}</span>
                               <span className="log-subject">{email.subject}</span>
@@ -277,7 +317,7 @@ const AdminInbox = () => {
                         </div>
                       ) : (
                         receivedEmails.map((email) => (
-                          <div key={email.id} className="email-log-item" onClick={() => setSelectedEmail(email)}>
+                          <div key={email.id} className="email-log-item" onClick={() => handleEmailClick(email)}>
                             <div className="log-main-info">
                               <span className="log-recipient"><strong>Od / From:</strong> {email.from}</span>
                               <span className="log-subject">{email.subject}</span>
@@ -314,6 +354,30 @@ const AdminInbox = () => {
                   <span><strong>Příjemce / To:</strong> {Array.isArray(selectedEmail.to) ? selectedEmail.to.join(', ') : selectedEmail.to}</span>
                   <span><strong>Předmět / Subject:</strong> {selectedEmail.subject}</span>
                   <span><strong>Čas / Date:</strong> {new Date(selectedEmail.created_at).toLocaleString()}</span>
+                </div>
+
+                <div className="email-body-detail" style={{ minHeight: '120px' }}>
+                  <strong style={{ display: 'block', color: 'var(--text-light)', marginBottom: '0.5rem' }}>Obsah e-mailu / Message Content:</strong>
+                  {emailDetailLoading ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '1rem 0', color: 'var(--text-main)' }}>
+                      <RefreshCw size={16} className="spin" />
+                      <span>Načítám obsah zprávy... / Loading email body...</span>
+                    </div>
+                  ) : emailDetail ? (
+                    emailDetail.html ? (
+                      <iframe 
+                        srcDoc={emailDetail.html} 
+                        title="Email Body" 
+                        style={{ width: '100%', height: '300px', border: '1px solid var(--glass-border)', borderRadius: '8px', background: '#fff', marginTop: '0.25rem' }}
+                      />
+                    ) : (
+                      <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)', marginTop: '0.25rem', maxHeight: '300px', overflowY: 'auto', whiteSpace: 'pre-wrap', color: 'var(--text-main)', fontSize: '0.9rem', lineHeight: '1.5' }}>
+                        {emailDetail.text || 'Bez obsahu / No content.'}
+                      </div>
+                    )
+                  ) : (
+                    <div style={{ color: 'var(--text-main)', fontStyle: 'italic', padding: '0.5rem 0' }}>Nelze načíst text e-mailu / Content unavailable.</div>
+                  )}
                 </div>
 
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
