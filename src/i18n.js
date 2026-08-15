@@ -123,7 +123,8 @@ const resources = {
       "reviews.form.rating": "Rating",
       "reviews.form.comment": "Comment",
       "reviews.form.submit": "Submit Review",
-      "reviews.success": "Thank you! Your review has been submitted for moderation.",
+      "reviews.success": "Thanks for your review.",
+      "reviews.rating.based_on": "Based on {{count}} reviews",
       "reviews.submitting": "Submitting review...",
       "reviews.error": "Failed to submit review. Please check your internet connection and Firebase rules settings.",
 
@@ -254,7 +255,8 @@ const resources = {
       "reviews.form.rating": "Bewertung",
       "reviews.form.comment": "Kommentar",
       "reviews.form.submit": "Absenden",
-      "reviews.success": "Vielen Dank! Ihre Bewertung wurde zur Prüfung eingereicht.",
+      "reviews.success": "Danke für Ihre Bewertung.",
+      "reviews.rating.based_on": "Basierend auf {{count}} Bewertungen",
       "reviews.submitting": "Wird gesendet...",
       "reviews.error": "Fehler beim Senden der Bewertung. Bitte überprüfen Sie Ihre Internetverbindung und die Firebase-Regeln.",
 
@@ -384,7 +386,8 @@ const resources = {
       "reviews.form.rating": "Hodnocení",
       "reviews.form.comment": "Komentář",
       "reviews.form.submit": "Odeslat hodnocení",
-      "reviews.success": "Děkujeme! Vaše hodnocení bylo odesláno ke schválení.",
+      "reviews.success": "Děkujeme za Vaše hodnocení.",
+      "reviews.rating.based_on": "Na základě {{count}} hodnocení",
       "reviews.submitting": "Odesílám hodnocení...",
       "reviews.error": "Chyba při odesílání hodnocení. Zkontrolujte prosím připojení k internetu a nastavení pravidel Firebase (Firestore Rules).",
 

@@ -139,7 +139,7 @@ const Reviews = () => {
               <div className="overall-stars">
                 {renderStars(Math.round(averageRating))}
               </div>
-              <span className="overall-count">Based on {totalReviews} Reviews</span>
+              <span className="overall-count">{t('reviews.rating.based_on', { count: reviewsList.length })}</span>
             </div>
           </div>
 
