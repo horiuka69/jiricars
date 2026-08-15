@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle2 } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
+import { db } from '../firebase';
+import { collection, addDoc } from 'firebase/firestore';
 import './Inquiry.css';
 
 const Inquiry = () => {
@@ -22,6 +24,28 @@ const Inquiry = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // 1. Create Firestore Conversation
+      const conversationData = {
+        customerName: formData.fullName,
+        customerEmail: formData.email,
+        phone: formData.phone || '',
+        subject: `Poptávka odtahu / Transport Inquiry`,
+        lastMessageAt: new Date().toISOString(),
+        messages: [
+          {
+            id: Math.random().toString(36).substring(2, 9),
+            sender: 'customer',
+            senderName: formData.fullName,
+            senderEmail: formData.email,
+            body: formData.message || 'No description provided.',
+            timestamp: new Date().toISOString()
+          }
+        ]
+      };
+
+      const docRef = await addDoc(collection(db, 'conversations'), conversationData);
+
+      // 2. Send email notification
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -30,7 +54,8 @@ const Inquiry = () => {
           name: formData.fullName,
           email: formData.email,
           phone: formData.phone,
-          message: formData.message
+          message: formData.message,
+          conversationId: docRef.id
         })
       });
       if (response.ok) {

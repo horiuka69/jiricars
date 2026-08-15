@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Resend API Key is not configured' });
   }
 
-  const { to, subject, body, replyToMessageId } = req.body;
+  const { to, subject, body, replyToMessageId, conversationId } = req.body;
   if (!to || !subject || !body) {
     return res.status(400).json({ error: 'Missing required fields (to, subject, body)' });
   }
@@ -21,6 +21,13 @@ export default async function handler(req, res) {
     html: `<div style="font-family: sans-serif; line-height: 1.6; color: #1f2937; padding: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px;">
       <p>${body.replace(/\n/g, '<br />')}</p>
       <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+      ${conversationId ? `
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; text-align: center; margin: 15px 0;">
+          <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #475569;">Odpovězte na zprávu online / Answer this message online:</p>
+          <a href="https://easyodtah.cz/chat/${conversationId}" style="display: inline-block; background: #06b6d4; color: #ffffff; padding: 8px 18px; border-radius: 6px; text-decoration: none; font-size: 0.9rem; font-weight: bold;">Otevřít konverzaci / Open Chat</a>
+        </div>
+        <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+      ` : ''}
       <p style="font-size: 0.85rem; color: #9ca3af;">Odesláno z administrace easyodtah.cz / Sent from easyodtah.cz admin.</p>
     </div>`
   };

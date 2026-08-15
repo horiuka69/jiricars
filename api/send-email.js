@@ -4,7 +4,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { formType, name, email, phone, subject, message } = req.body;
+  const { formType, name, email, phone, subject, message, conversationId } = req.body;
 
   // Validate required inputs
   if (!name || !email) {
@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   }
 
   const resendApiKey = process.env.RESEND_API_KEY;
-  const toEmail = process.env.DESTINATION_EMAIL || 'info@easyodtah.cz'; // fallback or env
+  const toEmail = process.env.DESTINATION_EMAIL || 'info@easyodtah.cz';
 
   if (!resendApiKey) {
     console.error('Missing RESEND_API_KEY environment variable');
@@ -37,6 +37,13 @@ export default async function handler(req, res) {
     <p><strong>Message / Details:</strong></p>
     <div style="background: #f4f4f5; padding: 15px; border-radius: 8px; border: 1px solid #e4e4e7; white-space: pre-wrap;">${message || 'No message content provided.'}</div>
     <hr />
+    ${conversationId ? `
+      <div style="margin: 20px 0; padding: 15px; border-radius: 8px; border: 1px solid #06b6d4; background: #ecfeff; text-align: center;">
+        <p style="margin: 0 0 10px 0; font-weight: bold; color: #0891b2;">Spravovat konverzaci v administraci / Manage Chat:</p>
+        <a href="https://easyodtah.cz/admin-inbox?thread=${conversationId}" style="display: inline-block; padding: 10px 20px; color: #fff; background: #06b6d4; border-radius: 6px; text-decoration: none; font-weight: bold;">Otevřít chatovací vlákno / Open Chat Thread</a>
+      </div>
+      <hr />
+    ` : ''}
     <p style="font-size: 0.8rem; color: #71717a;">This is an automated notification from your website easyodtah.cz.</p>
   `;
 

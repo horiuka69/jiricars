@@ -10,6 +10,7 @@ import TowingServices from './pages/TowingServices';
 import Reviews from './pages/Reviews';
 import Contact from './pages/Contact';
 import AdminInbox from './pages/AdminInbox';
+import CustomerChat from './pages/CustomerChat';
 import { AnimatePresence } from 'framer-motion';
 import { AdminProvider } from './context/AdminContext';
 import LoginModal from './components/LoginModal';
@@ -29,6 +30,7 @@ function App() {
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin-inbox" element={<AdminInbox />} />
+            <Route path="/chat/:id" element={<CustomerChat />} />
           </Routes>
         </AnimatePresence>
       </main>

@@ -4,6 +4,8 @@ import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Phone, Mail, MapPin, Clock, Send, CheckCircle2 } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
+import { db } from '../firebase';
+import { collection, addDoc } from 'firebase/firestore';
 import './Contact.css';
 
 const FacebookIcon = (props) => (
@@ -53,6 +55,28 @@ const Contact = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // 1. Create Firestore Conversation
+      const conversationData = {
+        customerName: formData.name,
+        customerEmail: formData.email,
+        phone: '',
+        subject: formData.subject || 'Obecný dotaz / General Contact',
+        lastMessageAt: new Date().toISOString(),
+        messages: [
+          {
+            id: Math.random().toString(36).substring(2, 9),
+            sender: 'customer',
+            senderName: formData.name,
+            senderEmail: formData.email,
+            body: formData.message || '',
+            timestamp: new Date().toISOString()
+          }
+        ]
+      };
+      
+      const docRef = await addDoc(collection(db, 'conversations'), conversationData);
+
+      // 2. Send email notification
       const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -61,7 +85,8 @@ const Contact = () => {
           name: formData.name,
           email: formData.email,
           subject: formData.subject,
-          message: formData.message
+          message: formData.message,
+          conversationId: docRef.id
         })
       });
       if (response.ok) {
