@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../firebase';
-import { collection, onSnapshot, query } from 'firebase/firestore';
+import { collection, onSnapshot, query, addDoc } from 'firebase/firestore';
 import { Mail, Send, Inbox, Clock, CheckCircle2, AlertCircle, RefreshCw, X, Search, User, ChevronDown, ChevronUp, CornerUpLeft, Filter, Phone, FileText } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
 import { useAdmin } from '../context/AdminContext';
@@ -33,6 +33,7 @@ const AdminInbox = () => {
   const [sending, setSending] = useState(false);
   const [sendSuccess, setSendSuccess] = useState(false);
   const [sendError, setSendError] = useState('');
+  const [syncing, setSyncing] = useState(false);
 
   // Compose new email overlay state
   const [showComposeModal, setShowComposeModal] = useState(false);
@@ -73,6 +74,79 @@ const AdminInbox = () => {
 
     return () => unsubscribe();
   }, [isAdmin]);
+
+  const syncResendHistoryToFirestore = async () => {
+    if (syncing) return;
+    setSyncing(true);
+    try {
+      const sentRes = await fetch('/api/list-sent-emails');
+      const sentData = await sentRes.json();
+      const rawSentList = sentData.data || [];
+      
+      const receivedRes = await fetch('/api/list-received-emails');
+      const receivedData = await receivedRes.json();
+      const rawReceivedList = receivedData.data || [];
+
+      // Get existing messageIds to avoid duplicates
+      const existingIds = new Set(emails.map(e => e.messageId));
+
+      // Import sent logs
+      for (const email of rawSentList) {
+        if (existingIds.has(email.id)) continue;
+        
+        const customerEmail = extractCustomerEmail(email);
+        const isFormNotification = email.to && email.to.some(r => r.includes('easyodtah.cz'));
+        
+        let formType = 'General';
+        const sub = (email.subject || '').toLowerCase();
+        if (sub.includes('towing') || sub.includes('odtah')) formType = 'towing';
+        else if (sub.includes('rental') || sub.includes('pronájem')) formType = 'rental';
+        else if (sub.includes('contact') || sub.includes('kontakt')) formType = 'contact';
+        
+        await addDoc(collection(db, 'emails'), {
+          messageId: email.id,
+          from: email.from || 'noreply@easyodtah.cz',
+          to: email.to || [],
+          replyTo: customerEmail,
+          subject: email.subject || '',
+          text: email.text || '',
+          html: email.html || '',
+          createdAt: email.created_at || new Date().toISOString(),
+          type: isFormNotification ? 'received' : 'sent',
+          formType: formType
+        });
+      }
+
+      // Import received logs
+      for (const email of rawReceivedList) {
+        if (existingIds.has(email.id)) continue;
+        
+        await addDoc(collection(db, 'emails'), {
+          messageId: email.id,
+          from: email.from || '',
+          to: email.to || [],
+          replyTo: email.from || '',
+          subject: email.subject || '',
+          text: email.text || '',
+          html: email.html || '',
+          createdAt: email.created_at || new Date().toISOString(),
+          type: 'received',
+          formType: 'custom'
+        });
+      }
+    } catch (err) {
+      console.error('Failed to sync Resend history:', err);
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  // Auto trigger sync if Firestore database is empty
+  useEffect(() => {
+    if (!loading && emails.length === 0 && isAdmin) {
+      syncResendHistoryToFirestore();
+    }
+  }, [loading, emails.length, isAdmin]);
 
   // Scroll details pane to bottom when selecting thread or message count changes
   useEffect(() => {
@@ -312,10 +386,16 @@ const AdminInbox = () => {
             <h1>Pošta a Poptávky / Mail Support</h1>
             <p>Gmail styl administrace propojený na Resend a Firestore databázi e-mailů</p>
           </div>
-          <button className="btn btn-primary" onClick={() => setShowComposeModal(true)}>
-            <Mail size={16} style={{ marginRight: '6px' }} />
-            <span>Napsat e-mail / Compose</span>
-          </button>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button className="btn" onClick={syncResendHistoryToFirestore} disabled={syncing} style={{ display: 'flex', alignItems: 'center' }}>
+              <RefreshCw size={16} className={syncing ? 'spin' : ''} style={{ marginRight: '6px' }} />
+              <span>{syncing ? 'Synchronizuji...' : 'Aktualizovat / Sync Resend'}</span>
+            </button>
+            <button className="btn btn-primary" onClick={() => setShowComposeModal(true)} style={{ display: 'flex', alignItems: 'center' }}>
+              <Mail size={16} style={{ marginRight: '6px' }} />
+              <span>Napsat e-mail / Compose</span>
+            </button>
+          </div>
         </div>
 
         {/* Sync Errors */}
