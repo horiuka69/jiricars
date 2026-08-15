@@ -50,6 +50,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         from: 'easyodtah.cz <noreply@easyodtah.cz>',
         to: toEmail,
+        reply_to: email, // Set customer's email as the Reply-To address
         subject: emailSubject,
         html: htmlBody
       })

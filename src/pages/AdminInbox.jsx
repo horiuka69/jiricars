@@ -441,9 +441,31 @@ const AdminInbox = () => {
                   <button 
                     className="btn btn-primary" 
                     onClick={() => {
-                      const replyTo = selectedEmail.from && selectedEmail.from.includes('easyodtah.cz') 
-                        ? (Array.isArray(selectedEmail.to) ? selectedEmail.to[0] : selectedEmail.to)
-                        : (selectedEmail.from || '');
+                      let replyTo = '';
+                      
+                      // 1. Try to get it from reply_to header if present
+                      if (emailDetail && emailDetail.reply_to && emailDetail.reply_to.length > 0) {
+                        replyTo = emailDetail.reply_to[0];
+                      }
+                      
+                      // 2. Fall back to regex parsing the body for "Email: customer@..."
+                      if (!replyTo && emailDetail) {
+                        const content = emailDetail.html || emailDetail.text || '';
+                        // Matches "Email:</strong> email" or "Email: email"
+                        const emailRegex = /(?:Email:<\/strong>\s*|Email:\s*)([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i;
+                        const match = content.match(emailRegex);
+                        if (match) {
+                          replyTo = match[1];
+                        }
+                      }
+                      
+                      // 3. Metadata fallback
+                      if (!replyTo) {
+                        replyTo = selectedEmail.from && selectedEmail.from.includes('easyodtah.cz') 
+                          ? (Array.isArray(selectedEmail.to) ? selectedEmail.to[0] : selectedEmail.to)
+                          : (selectedEmail.from || '');
+                      }
+
                       handleReply(replyTo, emailDetail ? emailDetail.message_id : '', selectedEmail.subject);
                       setSelectedEmail(null);
                     }}
