@@ -22,7 +22,6 @@ const AdminInbox = () => {
   // Search and Filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('received'); // 'received' (inbox), 'sent' (replied/composed)
-  const [formFilter, setFormFilter] = useState('all'); // 'all', 'contact', 'rental', 'odtah', 'custom'
 
   // Selected thread state
   const [selectedThreadKey, setSelectedThreadKey] = useState(null);
@@ -250,11 +249,7 @@ const AdminInbox = () => {
       if (activeTab === 'received' && !isLatestReceived) return false;
       if (activeTab === 'sent' && isLatestReceived) return false;
 
-      // 2. Form Type Filter
-      if (formFilter !== 'all') {
-        if (formFilter === 'custom' && thread.formType !== 'custom') return false;
-        if (formFilter !== 'custom' && thread.formType !== formFilter) return false;
-      }
+
 
       // 3. Search Bar Filter
       if (searchQuery) {
@@ -431,14 +426,7 @@ const AdminInbox = () => {
               )}
             </div>
 
-            {/* Form Type Filters */}
-            <div className="sidebar-filters">
-              <button className={`filter-pill ${formFilter === 'all' ? 'active' : ''}`} onClick={() => setFormFilter('all')}>All</button>
-              <button className={`filter-pill ${formFilter === 'towing' ? 'active' : ''}`} onClick={() => setFormFilter('towing')}>Odtah</button>
-              <button className={`filter-pill ${formFilter === 'rental' ? 'active' : ''}`} onClick={() => setFormFilter('rental')}>Pronájem</button>
-              <button className={`filter-pill ${formFilter === 'contact' ? 'active' : ''}`} onClick={() => setFormFilter('contact')}>Kontakt</button>
-              <button className={`filter-pill ${formFilter === 'custom' ? 'active' : ''}`} onClick={() => setFormFilter('custom')}>Custom</button>
-            </div>
+
 
             {/* Tab Toggles */}
             <div className="sidebar-tabs">
@@ -522,63 +510,70 @@ const AdminInbox = () => {
                   </span>
                 </div>
 
-                {/* Messages Log Stack */}
-                <div className="messages-scroller" style={{ flex: 1, overflowY: 'auto', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  {selectedThread.emails.map((email) => {
+                {/* Messages Log Stack (Gmail Thread style) */}
+                <div className="messages-scroller" style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  {selectedThread.emails.map((email, idx) => {
                     const isExpanded = expandedEmailId === email.id;
                     const isAdminSender = email.type === 'sent';
 
                     return (
                       <div 
                         key={email.id} 
-                        className={`message-card ${isAdminSender ? 'sent-by-admin' : 'received-by-admin'}`}
                         style={{
-                          border: isExpanded ? '1px solid var(--secondary-color)' : '1px solid var(--glass-border)',
-                          borderRadius: '12px',
-                          overflow: 'hidden'
+                          borderBottom: idx < selectedThread.emails.length - 1 ? '1px solid var(--glass-border)' : 'none',
+                          paddingBottom: '1.5rem',
+                          textAlign: 'left'
                         }}
                       >
-                        {/* Collapsed Card Header */}
+                        {/* Clean Header */}
                         <div 
-                          className="msg-card-header"
                           onClick={() => setExpandedEmailId(expandedEmailId === email.id ? null : email.id)}
                           style={{
-                            padding: '0.75rem 1rem',
                             display: 'flex',
                             justifyContent: 'space-between',
                             alignItems: 'center',
                             cursor: 'pointer',
-                            background: 'rgba(255, 255, 255, 0.01)'
+                            paddingBottom: isExpanded ? '0.75rem' : '0'
                           }}
                         >
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem', fontSize: '0.85rem', textAlign: 'left' }}>
-                            <span style={{ color: 'var(--text-light)', fontWeight: 'bold' }}>
-                              {isAdminSender ? 'Easyodtah Podpora (info@easyodtah.cz)' : email.from}
-                            </span>
-                            <span style={{ color: 'var(--text-main)', fontSize: '0.8rem' }}>
-                              Příjemce: {Array.isArray(email.to) ? email.to.join(', ') : email.to}
-                            </span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                            <div className="customer-avatar" style={{ width: '32px', height: '32px' }}>
+                              <User size={16} />
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                              <span style={{ color: 'var(--text-light)', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                                {isAdminSender ? 'Easyodtah Podpora (info@easyodtah.cz)' : email.from}
+                              </span>
+                              {!isExpanded && (
+                                <span style={{ color: 'var(--text-main)', fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '300px' }}>
+                                  {email.text ? email.text.substring(0, 80) + '...' : 'Kliknutím rozbalíte / Click to expand'}
+                                </span>
+                              )}
+                            </div>
                           </div>
                           
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                              <Clock size={12} /> {new Date(email.createdAt).toLocaleString()}
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-main)' }}>
+                              {new Date(email.createdAt).toLocaleString()}
                             </span>
-                            {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                            {isExpanded ? <ChevronUp size={16} style={{ color: 'var(--text-main)' }} /> : <ChevronDown size={16} style={{ color: 'var(--text-main)' }} />}
                           </div>
                         </div>
 
-                        {/* Expanded Body Frame */}
+                        {/* Expanded Content Body (No borders/background boxes) */}
                         {isExpanded && (
-                          <div style={{ padding: '1.25rem', borderTop: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.12)', textAlign: 'left' }}>
+                          <div style={{ padding: '0.5rem 0 0 2.75rem' }}>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-main)', marginBottom: '0.75rem' }}>
+                              Komu: {Array.isArray(email.to) ? email.to.join(', ') : email.to}
+                            </div>
                             {email.html ? (
                               <iframe 
                                 srcDoc={email.html} 
                                 title={`EmailBody-${email.id}`}
-                                style={{ width: '100%', height: '320px', border: '1px solid var(--glass-border)', borderRadius: '8px', background: '#fff' }}
+                                style={{ width: '100%', height: '320px', border: 'none', background: 'transparent' }}
                               />
                             ) : (
-                              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '8px', border: '1px solid var(--glass-border)', maxHeight: '320px', overflowY: 'auto', whiteSpace: 'pre-wrap', color: 'var(--text-main)', fontSize: '0.9rem', lineHeight: '1.5' }}>
+                              <div style={{ whiteSpace: 'pre-wrap', color: 'var(--text-light)', fontSize: '0.95rem', lineHeight: '1.6' }}>
                                 {email.text || 'Bez textu / No content'}
                               </div>
                             )}
