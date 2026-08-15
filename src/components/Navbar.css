@@ -219,3 +219,30 @@
     color: var(--text-main);
   }
 }
+
+/* Compact layout for narrow mobile screens to prevent overflow */
+@media (max-width: 576px) {
+  .logo span {
+    font-size: 1.25rem;
+  }
+  .logo img {
+    height: 32px !important;
+  }
+  .lang-trigger-btn {
+    padding: 0.4rem 0.5rem;
+    gap: 0.25rem;
+  }
+  .lang-trigger-btn .current-label,
+  .lang-trigger-btn .chevron-icon {
+    display: none;
+  }
+  .lang-dropdown-menu {
+    width: 90px;
+  }
+  .nav-right {
+    gap: 0.5rem;
+  }
+  .mobile-menu-toggle {
+    padding: 6px;
+  }
+}
