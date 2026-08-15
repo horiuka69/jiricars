@@ -55,6 +55,9 @@ const Reviews = () => {
         setReviewsList(fetchedReviews);
       }
       setLoading(false);
+    }, (error) => {
+      console.error("Firestore subscription error:", error);
+      setLoading(false);
     });
 
     return () => unsubscribe();
