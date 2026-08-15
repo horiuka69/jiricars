@@ -33,6 +33,8 @@ const AdminInbox = () => {
   const [sendSuccess, setSendSuccess] = useState(false);
   const [sendError, setSendError] = useState('');
   const [syncing, setSyncing] = useState(false);
+  const [emailDetailsCache, setEmailDetailsCache] = useState({});
+  const [detailLoadingId, setDetailLoadingId] = useState(null);
 
   // Compose new email overlay state
   const [showComposeModal, setShowComposeModal] = useState(false);
@@ -181,6 +183,43 @@ const AdminInbox = () => {
       if (ext) return ext;
     }
     return 'info@easyodtah.cz';
+  };
+
+  const loadEmailDetails = async (email) => {
+    // If it's already expanded, collapse it
+    if (expandedEmailId === email.id) {
+      setExpandedEmailId(null);
+      return;
+    }
+
+    // If it has HTML or text directly in the Firestore doc, no need to fetch
+    if (email.html || email.text) {
+      setExpandedEmailId(email.id);
+      return;
+    }
+
+    // If we already cached it, use the cache
+    if (emailDetailsCache[email.id]) {
+      setExpandedEmailId(email.id);
+      return;
+    }
+
+    // Otherwise, fetch it on-demand from Resend
+    setDetailLoadingId(email.id);
+    try {
+      const res = await fetch(`/api/get-email?id=${email.messageId || email.id}&type=${email.type || 'sent'}`);
+      const data = await res.json();
+      if (res.ok) {
+        setEmailDetailsCache(prev => ({ ...prev, [email.id]: data }));
+        setExpandedEmailId(email.id);
+      } else {
+        console.error("Failed to load email details:", data.error);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDetailLoadingId(null);
+    }
   };
 
   // Group emails list into threads
@@ -515,6 +554,10 @@ const AdminInbox = () => {
                   {selectedThread.emails.map((email, idx) => {
                     const isExpanded = expandedEmailId === email.id;
                     const isAdminSender = email.type === 'sent';
+                    const cachedDetail = emailDetailsCache[email.id];
+                    const displayHtml = cachedDetail?.html || email.html || '';
+                    const displayText = cachedDetail?.text || email.text || '';
+                    const isFetching = detailLoadingId === email.id;
 
                     return (
                       <div 
@@ -527,7 +570,7 @@ const AdminInbox = () => {
                       >
                         {/* Clean Header */}
                         <div 
-                          onClick={() => setExpandedEmailId(expandedEmailId === email.id ? null : email.id)}
+                          onClick={() => loadEmailDetails(email)}
                           style={{
                             display: 'flex',
                             justifyContent: 'space-between',
@@ -546,7 +589,7 @@ const AdminInbox = () => {
                               </span>
                               {!isExpanded && (
                                 <span style={{ color: 'var(--text-main)', fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '300px' }}>
-                                  {email.text ? email.text.substring(0, 80) + '...' : 'Kliknutím rozbalíte / Click to expand'}
+                                  {displayText ? displayText.substring(0, 80) + '...' : 'Kliknutím rozbalíte / Click to expand'}
                                 </span>
                               )}
                             </div>
@@ -556,7 +599,13 @@ const AdminInbox = () => {
                             <span style={{ fontSize: '0.8rem', color: 'var(--text-main)' }}>
                               {new Date(email.createdAt).toLocaleString()}
                             </span>
-                            {isExpanded ? <ChevronUp size={16} style={{ color: 'var(--text-main)' }} /> : <ChevronDown size={16} style={{ color: 'var(--text-main)' }} />}
+                            {isFetching ? (
+                              <RefreshCw size={14} className="spin" style={{ color: 'var(--secondary-color)' }} />
+                            ) : isExpanded ? (
+                              <ChevronUp size={16} style={{ color: 'var(--text-main)' }} />
+                            ) : (
+                              <ChevronDown size={16} style={{ color: 'var(--text-main)' }} />
+                            )}
                           </div>
                         </div>
 
@@ -566,15 +615,15 @@ const AdminInbox = () => {
                             <div style={{ fontSize: '0.8rem', color: 'var(--text-main)', marginBottom: '0.75rem' }}>
                               Komu: {Array.isArray(email.to) ? email.to.join(', ') : email.to}
                             </div>
-                            {email.html ? (
+                            {displayHtml ? (
                               <iframe 
-                                srcDoc={email.html} 
+                                srcDoc={displayHtml} 
                                 title={`EmailBody-${email.id}`}
                                 style={{ width: '100%', height: '320px', border: 'none', background: 'transparent' }}
                               />
                             ) : (
                               <div style={{ whiteSpace: 'pre-wrap', color: 'var(--text-light)', fontSize: '0.95rem', lineHeight: '1.6' }}>
-                                {email.text || 'Bez textu / No content'}
+                                {displayText || 'Bez obsahu / No content'}
                               </div>
                             )}
                           </div>
