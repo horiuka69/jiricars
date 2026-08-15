@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Send, Inbox, ArrowRight, CornerUpLeft, Clock, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { Mail, Send, Inbox, ArrowRight, CornerUpLeft, Clock, CheckCircle2, AlertCircle, RefreshCw, X, Search } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
 import { useAdmin } from '../context/AdminContext';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +19,9 @@ const AdminInbox = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   
+  // Search query state
+  const [searchQuery, setSearchQuery] = useState('');
+
   // Compose form states
   const [composeTo, setComposeTo] = useState('');
   const [composeSubject, setComposeSubject] = useState('');
@@ -58,16 +61,16 @@ const AdminInbox = () => {
         
         // Filter: If recipient contains easyodtah.cz, classify it as received (form notifications)
         const filteredReceived = [
-          ...rawReceivedList,
-          ...rawSentList.filter(email => 
-            email.to && email.to.some(recipient => recipient.includes('easyodtah.cz'))
-          )
+          ...rawReceivedList.map(email => ({ ...email, type: 'received' })),
+          ...rawSentList
+            .filter(email => email.to && email.to.some(recipient => recipient.includes('easyodtah.cz')))
+            .map(email => ({ ...email, type: 'sent' })) // These are technically sent emails but act as received notifications
         ];
 
         // Filter: If recipient is NOT on easyodtah.cz, classify it as sent
-        const filteredSent = rawSentList.filter(email => 
-          !email.to || !email.to.some(recipient => recipient.includes('easyodtah.cz'))
-        );
+        const filteredSent = rawSentList
+          .filter(email => !email.to || !email.to.some(recipient => recipient.includes('easyodtah.cz')))
+          .map(email => ({ ...email, type: 'sent' }));
         
         // Sort both by created_at desc
         filteredReceived.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
@@ -97,7 +100,8 @@ const AdminInbox = () => {
     setEmailDetailLoading(true);
     setEmailDetail(null);
     try {
-      const res = await fetch(`/api/get-email?id=${email.id}`);
+      // Pass both id and type so backend queries the correct Resend endpoint (/emails/receiving or /emails)
+      const res = await fetch(`/api/get-email?id=${email.id}&type=${email.type || 'sent'}`);
       const data = await res.json();
       if (res.ok) {
         setEmailDetail(data);
@@ -156,13 +160,26 @@ const AdminInbox = () => {
     setActiveTab('compose');
   };
 
+  // Helper search filter
+  const filterBySearch = (list) => {
+    if (!searchQuery) return list;
+    const q = searchQuery.toLowerCase();
+    return list.filter(email => {
+      const matchesSubject = email.subject && email.subject.toLowerCase().includes(q);
+      const matchesFrom = email.from && email.from.toLowerCase().includes(q);
+      const matchesTo = email.to && email.to.some(recipient => recipient.toLowerCase().includes(q));
+      const matchesId = email.id && email.id.toLowerCase().includes(q);
+      return matchesSubject || matchesFrom || matchesTo || matchesId;
+    });
+  };
+
   if (!isAdmin) return null;
 
   return (
     <PageTransition>
       <section className="admin-inbox-page container">
         <div className="inbox-header">
-          <h1>Adminstrátorská schránka / Inbox</h1>
+          <h1>Administrátorská schránka / Inbox</h1>
           <p>Přehled odeslaných e-mailů a možnost přímé odpovědi zákazníkům pod doménou easyodtah.cz</p>
         </div>
 
@@ -278,6 +295,36 @@ const AdminInbox = () => {
           ) : (
             // Lists View
             <div className="logs-panel glass-panel">
+              {/* Search Bar */}
+              <div className="search-bar-container" style={{ marginBottom: '1.5rem', position: 'relative' }}>
+                <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-main)' }} />
+                <input 
+                  type="text" 
+                  placeholder="Hledat e-maily... / Search emails..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  style={{ 
+                    width: '100%', 
+                    padding: '0.75rem 1rem 0.75rem 2.75rem', 
+                    background: 'rgba(255,255,255,0.02)', 
+                    border: '1px solid var(--glass-border)', 
+                    borderRadius: '12px', 
+                    color: 'var(--text-light)', 
+                    outline: 'none',
+                    fontFamily: 'inherit',
+                    boxSizing: 'border-box'
+                  }} 
+                />
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery('')} 
+                    style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: 'var(--text-main)', cursor: 'pointer' }}
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+
               {loading ? (
                 <div className="logs-loading">
                   <RefreshCw size={24} className="spin" />
@@ -287,10 +334,10 @@ const AdminInbox = () => {
                 <>
                   {activeTab === 'sent' && (
                     <div className="email-logs-list">
-                      {sentEmails.length === 0 ? (
+                      {filterBySearch(sentEmails).length === 0 ? (
                         <div className="empty-logs">Žádné odeslané e-maily / No sent emails found.</div>
                       ) : (
-                        sentEmails.map((email) => (
+                        filterBySearch(sentEmails).map((email) => (
                           <div key={email.id} className="email-log-item" onClick={() => handleEmailClick(email)}>
                             <div className="log-main-info">
                               <span className="log-recipient"><strong>Komu / To:</strong> {email.to.join(', ')}</span>
@@ -308,7 +355,7 @@ const AdminInbox = () => {
 
                   {activeTab === 'received' && (
                     <div className="email-logs-list">
-                      {receivedEmails.length === 0 ? (
+                      {filterBySearch(receivedEmails).length === 0 ? (
                         <div className="empty-logs">
                           Žádné doručené zprávy / No incoming emails found.
                           <p style={{ fontSize: '0.8rem', color: 'var(--text-main)', marginTop: '0.5rem' }}>
@@ -316,7 +363,7 @@ const AdminInbox = () => {
                           </p>
                         </div>
                       ) : (
-                        receivedEmails.map((email) => (
+                        filterBySearch(receivedEmails).map((email) => (
                           <div key={email.id} className="email-log-item" onClick={() => handleEmailClick(email)}>
                             <div className="log-main-info">
                               <span className="log-recipient"><strong>Od / From:</strong> {email.from}</span>
