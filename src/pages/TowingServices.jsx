@@ -94,10 +94,6 @@ const TowingServices = () => {
                 <Phone size={20} />
                 <span>{t('towing.emergency.btn')}</span>
               </a>
-              <div className="availability-notice">
-                <Clock size={16} />
-                <span>NON-STOP 24/7/365</span>
-              </div>
             </div>
 
             {/* Pricing Details */}

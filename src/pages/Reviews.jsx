@@ -30,34 +30,7 @@ const Reviews = () => {
         ...doc.data()
       }));
       
-      // Seed initial reviews if collection is empty
-      if (fetchedReviews.length === 0) {
-        const initialReviews = [
-          {
-            name: "Marek K.",
-            rating: 5,
-            date: "2026-07-10",
-            comment: "Absolutely top-tier import service! Brought my Audi RS6 from Frankfurt to Prague within 48 hours, fully insured. Kept me updated with GPS locations all the way. Recommending JiriCars to all my colleagues!"
-          },
-          {
-            name: "Sofia M.",
-            rating: 5,
-            date: "2026-07-04",
-            comment: "Purchased a Mercedes E63 from their marketplace. The car was in immaculate condition, fully polished, and detailed. Jiri is a true professional."
-          },
-          {
-            name: "David V.",
-            rating: 4,
-            date: "2026-06-25",
-            comment: "Rented the tow truck for transport from Austria. Booking was straightforward on their calendar. Winch worked perfectly, vehicle is very modern. 4/5 because of slightly tight cabin storage, otherwise perfect!"
-          }
-        ];
-        initialReviews.forEach(async (rev) => {
-          await addDoc(collection(db, 'reviews'), rev);
-        });
-      } else {
-        setReviewsList(fetchedReviews);
-      }
+      setReviewsList(fetchedReviews);
       setLoading(false);
     }, (error) => {
       console.error("Firestore subscription error:", error);

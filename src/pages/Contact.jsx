@@ -120,7 +120,7 @@ const Contact = () => {
               <div className="contact-detail-item">
                 <Phone size={22} className="contact-icon" />
                 <div>
-                  <strong>Phone</strong>
+                  <strong>{t('contact.lbl.phone')}</strong>
                   <span>+420 737 218 650</span>
                 </div>
               </div>
@@ -128,7 +128,7 @@ const Contact = () => {
               <div className="contact-detail-item">
                 <Mail size={22} className="contact-icon" />
                 <div>
-                  <strong>Email</strong>
+                  <strong>{t('contact.lbl.email')}</strong>
                   <span>info@easyodtah.cz</span>
                 </div>
               </div>
@@ -136,7 +136,7 @@ const Contact = () => {
               <div className="contact-detail-item">
                 <MapPin size={22} className="contact-icon" />
                 <div>
-                  <strong>Location</strong>
+                  <strong>{t('contact.lbl.location')}</strong>
                   <span>Všetaty u Rakovníka, 270 21</span>
                 </div>
               </div>
@@ -150,7 +150,7 @@ const Contact = () => {
               >
                 <FacebookIcon size={22} className="contact-icon" />
                 <div>
-                  <strong>Facebook</strong>
+                  <strong>{t('contact.lbl.facebook')}</strong>
                   <span>{t('contact.facebook')}</span>
                 </div>
               </a>
@@ -165,50 +165,50 @@ const Contact = () => {
               {isSubmitted ? (
                 <div className="form-success-message">
                   <CheckCircle2 size={48} className="success-icon" />
-                  <h4>Message Sent!</h4>
+                  <h4>{t('contact.success.title')}</h4>
                   <p>{t('contact.form.success')}</p>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="contact-form">
                   <div className="form-group">
-                    <label>Full Name</label>
+                    <label>{t('contact.form.name')}</label>
                     <input 
                       type="text" 
                       required 
-                      placeholder="e.g. David Novak"
+                      placeholder={t('contact.placeholder.name')}
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>Email Address</label>
+                    <label>{t('contact.form.email')}</label>
                     <input 
                       type="email" 
                       required 
-                      placeholder="e.g. david@example.cz"
+                      placeholder={t('contact.placeholder.email')}
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>Subject</label>
+                    <label>{t('contact.form.subject')}</label>
                     <input 
                       type="text" 
                       required 
-                      placeholder="e.g. Sourcing Inquiry"
+                      placeholder={t('contact.placeholder.subject')}
                       value={formData.subject}
                       onChange={(e) => handleInputChange('subject', e.target.value)}
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>Message</label>
+                    <label>{t('contact.form.message')}</label>
                     <textarea 
                       required 
                       rows="5" 
-                      placeholder="Type your message details here..."
+                      placeholder={t('contact.placeholder.message')}
                       value={formData.message}
                       onChange={(e) => handleInputChange('message', e.target.value)}
                     ></textarea>

@@ -53,6 +53,7 @@ const resources = {
       "inquiry.lbl.message": "Message (Vehicle type, location, special wishes)",
       "inquiry.btn.submit": "Submit Inquiry",
       "inquiry.success": "Inquiry submitted successfully! We will contact you with a detailed quote within 2 hours.",
+      "inquiry.success.title": "Success!",
 
       // Rental Page
       "rental.title": "Tow Truck Rental",
@@ -137,7 +138,25 @@ const resources = {
       "contact.hours.title": "Business Hours",
       "contact.form.title": "Send us a Message",
       "contact.form.btn": "Send Message",
-      "contact.form.success": "Message sent! We will get back to you as soon as possible."
+      "contact.form.success": "Message sent! We will get back to you as soon as possible.",
+      "contact.lbl.phone": "Phone",
+      "contact.lbl.email": "Email",
+      "contact.lbl.location": "Location",
+      "contact.lbl.facebook": "Facebook",
+      "contact.form.name": "Full Name",
+      "contact.form.email": "Email Address",
+      "contact.form.subject": "Subject",
+      "contact.form.message": "Message",
+      "contact.placeholder.name": "e.g. David Novak",
+      "contact.placeholder.email": "e.g. david@example.cz",
+      "contact.placeholder.subject": "e.g. Sourcing Inquiry",
+      "contact.placeholder.message": "Type your message details here...",
+      "contact.success.title": "Message Sent!",
+      "inquiry.placeholder.name": "e.g. Jan Novák",
+      "inquiry.placeholder.email": "e.g. jan.novak@example.cz",
+      "inquiry.placeholder.phone": "e.g. +420 123 456 789",
+      "inquiry.placeholder.message": "Type your message details here...",
+      "inquiry.success.title": "Success!"
     }
   },
   de: {
@@ -320,6 +339,7 @@ const resources = {
       "inquiry.lbl.message": "Vaše zpráva (upřesnění vozidla, odkud/kam, termín...)",
       "inquiry.btn.submit": "Odeslat poptávku",
       "inquiry.success": "Poptávka byla úspěšně odeslána! Brzy vás kontaktujeme s cenovou nabídkou.",
+      "inquiry.success.title": "Úspěch!",
 
       "rental.title": "Pronájem odtahového vozu",
       "rental.subtitle": "Pronajměte si náš profesionální odtahový vůz Citroën Jumper (3.5t). Podívejte se na specifikace a spočítejte si cenu. K řízení stačí řidičské oprávnění sk. B.",
@@ -401,7 +421,25 @@ const resources = {
       "contact.hours.title": "Otevírací doba",
       "contact.form.title": "Napište nám zprávu",
       "contact.form.btn": "Odeslat zprávu",
-      "contact.form.success": "Zpráva odeslána! Ozveme se vám zpět co nejdříve."
+      "contact.form.success": "Zpráva odeslána! Ozveme se vám zpět co nejdříve.",
+      "contact.lbl.phone": "Telefon",
+      "contact.lbl.email": "E-mail",
+      "contact.lbl.location": "Adresa",
+      "contact.lbl.facebook": "Facebook",
+      "contact.form.name": "Celé jméno",
+      "contact.form.email": "E-mailová adresa",
+      "contact.form.subject": "Předmět",
+      "contact.form.message": "Zpráva",
+      "contact.placeholder.name": "např. Jan Novák",
+      "contact.placeholder.email": "např. jan.novak@example.cz",
+      "contact.placeholder.subject": "např. Poptávka dovozu",
+      "contact.placeholder.message": "Zde napište podrobnosti o vaší zprávě...",
+      "contact.success.title": "Zpráva odeslána!",
+      "inquiry.placeholder.name": "např. Jan Novák",
+      "inquiry.placeholder.email": "např. jan.novak@example.cz",
+      "inquiry.placeholder.phone": "např. +420 123 456 789",
+      "inquiry.placeholder.message": "Zde napište podrobnosti o vaší poptávce...",
+      "inquiry.success.title": "Úspěch!"
     }
   }
 };

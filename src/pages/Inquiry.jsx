@@ -87,7 +87,7 @@ const Inquiry = () => {
                 transition={{ duration: 0.4 }}
               >
                 <CheckCircle2 size={64} className="success-icon" />
-                <h2>Success!</h2>
+                <h2>{t('inquiry.success.title')}</h2>
                 <p>{t('inquiry.success')}</p>
                 <div className="summary-box">
                   <h4>{t('inquiry.lbl.name')}:</h4>
@@ -123,7 +123,7 @@ const Inquiry = () => {
                   <input 
                     type="text" 
                     required 
-                    placeholder="e.g. Jan Novák"
+                    placeholder={t('inquiry.placeholder.name')}
                     value={formData.fullName}
                     onChange={(e) => handleInputChange('fullName', e.target.value)}
                   />
@@ -134,7 +134,7 @@ const Inquiry = () => {
                   <input 
                     type="email" 
                     required 
-                    placeholder="e.g. jan.novak@example.cz"
+                    placeholder={t('inquiry.placeholder.email')}
                     value={formData.email}
                     onChange={(e) => handleInputChange('email', e.target.value)}
                   />
@@ -145,7 +145,7 @@ const Inquiry = () => {
                   <input 
                     type="tel" 
                     required 
-                    placeholder="e.g. +420 123 456 789"
+                    placeholder={t('inquiry.placeholder.phone')}
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                   />
@@ -156,7 +156,7 @@ const Inquiry = () => {
                   <textarea 
                     required 
                     rows={5}
-                    placeholder="..."
+                    placeholder={t('inquiry.placeholder.message')}
                     value={formData.message}
                     onChange={(e) => handleInputChange('message', e.target.value)}
                     style={{

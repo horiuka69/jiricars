@@ -63,9 +63,6 @@ const Home = () => {
               initial="hidden"
               animate="show"
             >
-              <motion.div variants={itemVariants} className="hero-badge">
-                <ShieldCheck size={16} /> <span>100% Certified Import Services</span>
-              </motion.div>
               <motion.h1 variants={itemVariants} className="hero-title">
                 {t('home.hero.title')}
               </motion.h1>
