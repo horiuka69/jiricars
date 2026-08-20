@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Phone, Mail, MapPin, Clock, Send, CheckCircle2 } from 'lucide-react';
+import { Phone, Mail, MapPin, Clock, Send, CheckCircle2, FileText } from 'lucide-react';
 import PageTransition from '../components/PageTransition';
 import { db } from '../firebase';
 import { collection, addDoc } from 'firebase/firestore';
@@ -121,7 +121,7 @@ const Contact = () => {
                 <Phone size={22} className="contact-icon" />
                 <div>
                   <strong>{t('contact.lbl.phone')}</strong>
-                  <span>+420 737 218 650</span>
+                  <span>+420 732 918 998</span>
                 </div>
               </div>
 
@@ -138,6 +138,14 @@ const Contact = () => {
                 <div>
                   <strong>{t('contact.lbl.location')}</strong>
                   <span>Všetaty u Rakovníka, 270 21</span>
+                </div>
+              </div>
+
+              <div className="contact-detail-item">
+                <FileText size={22} className="contact-icon" />
+                <div>
+                  <strong>IČO</strong>
+                  <span>61080675</span>
                 </div>
               </div>
 

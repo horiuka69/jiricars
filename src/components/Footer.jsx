@@ -53,7 +53,7 @@ const Footer = () => {
           <h4>{t('nav.contact')}</h4>
           <div className="contact-item">
             <Phone size={16} />
-            <span>+420 737 218 650</span>
+            <span>+420 732 918 998</span>
           </div>
           <div className="contact-item">
             <Mail size={16} />

@@ -90,7 +90,7 @@ const TowingServices = () => {
               </div>
               <h2>{t('towing.emergency.title')}</h2>
               <p>{t('towing.emergency.desc')}</p>
-              <a href="tel:+420737218650" className="emergency-dial-btn btn btn-primary">
+              <a href="tel:+420732918998" className="emergency-dial-btn btn btn-primary">
                 <Phone size={20} />
                 <span>{t('towing.emergency.btn')}</span>
               </a>
