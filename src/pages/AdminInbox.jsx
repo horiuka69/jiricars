@@ -431,6 +431,16 @@ const AdminInbox = () => {
                     </div>
                   </div>
 
+                  {/* Gmail Reply Instructions */}
+                  <div style={{ background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: '12px', padding: '1.25rem', marginBottom: '2rem', textAlign: 'left' }}>
+                    <p style={{ margin: '0 0 0.5rem 0', fontWeight: 'bold', color: '#f59e0b' }}>
+                      Návod k odpovědi / Reply Instructions:
+                    </p>
+                    <p style={{ margin: '0', fontSize: '0.9rem', color: 'var(--text-main)', lineHeight: '1.5' }}>
+                      Tato administrace slouží pouze pro statistiky a přehled poptávek. Chcete-li zákazníkovi odpovědět, <strong>zkopírujte jeho e-mailovou adresu ({extractCustomerEmail(selectedSubmission)})</strong> a napište novou zprávu přímo ve svém Gmailu. Tím zajistíte, že komunikace bude probíhat pod vaší doménou na Gmailu.
+                    </p>
+                  </div>
+
                   {/* Native Reply actions bar */}
                   <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem', borderTop: '1px solid var(--glass-border)', paddingTop: '2rem', justifyContent: 'flex-start' }}>
                     <a href={`mailto:${extractCustomerEmail(selectedSubmission)}?subject=Re: ${selectedSubmission.subject || 'easyodtah.cz inquiry'}`} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
