@@ -438,6 +438,21 @@
   to { transform: rotate(360deg); }
 }
 
+/* Form submissions panel custom styling */
+.form-submission-detail-pane {
+  background: rgba(18, 22, 33, 0.2);
+}
+
+.form-info-card {
+  transition: all 0.25s ease;
+}
+
+.form-info-card:hover {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: var(--secondary-color) !important;
+  transform: translateY(-2px);
+}
+
 @media (max-width: 992px) {
   .chat-layout-container {
     flex-direction: column;

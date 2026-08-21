@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Mail server configuration error' });
   }
 
-  // Construct Email Content
+  // Construct Email Content (Full details saved to database)
   let emailSubject = `[easyodtah.cz] New Form Submission: ${formType || 'General'}`;
   if (subject) {
     emailSubject += ` - ${subject}`;
@@ -40,6 +40,34 @@ export default async function handler(req, res) {
     <p style="font-size: 0.8rem; color: #71717a;">This is an automated notification from your website easyodtah.cz.</p>
   `;
 
+  // Create lightweight preview-only notification for email inbox
+  const notificationHtml = `
+    <div style="font-family: sans-serif; max-width: 600px; color: #1f2937; line-height: 1.6;">
+      <h2 style="color: #06b6d4;">Nová poptávka z easyodtah.cz / New Sourcing Form</h2>
+      <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 15px 0;" />
+      <p style="font-size: 1.05rem;">Dostali jste novou poptávku od zákazníka. Níže je stručný náhled:</p>
+      
+      <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+        <p style="margin: 4px 0;"><strong>Typ formuláře / Form Type:</strong> ${formType ? formType.toUpperCase() : 'General'}</p>
+        <p style="margin: 4px 0;"><strong>Jméno / Name:</strong> ${name}</p>
+        ${subject ? `<p style="margin: 4px 0;"><strong>Předmět / Subject:</strong> ${subject}</p>` : ''}
+      </div>
+
+      <div style="background: #fffbeb; padding: 15px; border-radius: 8px; border: 1px solid #fef3c7; color: #b45309; font-weight: bold; margin-bottom: 20px; font-size: 0.95rem;">
+        Upozornění: Kompletní údaje, telefonní číslo, e-mail a celou zprávu naleznete na svém administračním panelu easyodtah.cz.
+      </div>
+
+      <p style="text-align: center; margin: 25px 0;">
+        <a href="https://easyodtah.cz/admin-inbox" style="display: inline-block; background: #06b6d4; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; box-shadow: 0 4px 6px rgba(6, 182, 212, 0.2);">
+          Zobrazit v administraci / View in Dashboard
+        </a>
+      </p>
+
+      <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 15px 0;" />
+      <p style="font-size: 0.8rem; color: #9ca3af; text-align: center;">Toto je automatické upozornění z vašeho webu easyodtah.cz.</p>
+    </div>
+  `;
+
   try {
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -52,7 +80,7 @@ export default async function handler(req, res) {
         to: toEmail,
         reply_to: email, // Set customer's email as the Reply-To address
         subject: emailSubject,
-        html: htmlBody
+        html: notificationHtml
       })
     });
 

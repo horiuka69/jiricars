@@ -156,6 +156,20 @@ const AdminInbox = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [selectedThreadKey]);
 
+  const getFormMessageBody = (text) => {
+    if (!text) return 'Bez obsahu / No message content provided.';
+    const parts = text.split(/(?:Message:|Zpráva:|Message \/ Details:)\s*/i);
+    if (parts.length > 1) {
+      return parts[1].trim();
+    }
+    return text
+      .replace(/Form Type:[^\r\n]*/gi, '')
+      .replace(/Name:[^\r\n]*/gi, '')
+      .replace(/Email:[^\r\n]*/gi, '')
+      .replace(/Phone:[^\r\n]*/gi, '')
+      .trim();
+  };
+
   // Helper clean subject function to group threads
   const getCleanSubject = (subject) => {
     if (!subject) return 'bez předmětu / no subject';
@@ -288,8 +302,15 @@ const AdminInbox = () => {
       const isLatestReceived = latestEmail.type === 'received' || (latestEmail.to && latestEmail.to.some(r => r.includes('easyodtah.cz')));
 
       // 1. Tab Filter
-      if (activeTab === 'received' && !isLatestReceived) return false;
-      if (activeTab === 'sent' && isLatestReceived) return false;
+      if (activeTab === 'received') {
+        if (!isLatestReceived || thread.formType !== 'custom') return false;
+      }
+      if (activeTab === 'sent') {
+        if (isLatestReceived || thread.formType !== 'custom') return false;
+      }
+      if (activeTab === 'forms') {
+        if (thread.formType === 'custom') return false;
+      }
 
 
 
@@ -481,6 +502,10 @@ const AdminInbox = () => {
                 <Send size={14} />
                 <span>Odeslané / Sent</span>
               </button>
+              <button className={`sidebar-tab-btn ${activeTab === 'forms' ? 'active' : ''}`} onClick={() => setActiveTab('forms')}>
+                <FileText size={14} />
+                <span>Poptávky / Forms</span>
+              </button>
             </div>
 
             {/* Threads List */}
@@ -531,112 +556,220 @@ const AdminInbox = () => {
           <div className="chat-feed-container glass-panel">
             {selectedThread ? (
               <>
-                {/* Thread Header Info Card */}
-                <div className="chat-header-info">
-                  <div className="customer-avatar">
-                    <User size={20} />
-                  </div>
-                  <div className="header-meta">
-                    <h3>{selectedThread.customerName}</h3>
-                    <p style={{ color: 'var(--text-main)', fontSize: '0.85rem' }}>
-                      <strong>Email:</strong> {selectedThread.customerEmail}
-                      {selectedThread.customerPhone && (
-                        <>
-                          <span style={{ margin: '0 0.5rem' }}>|</span>
-                          <strong>Telefon:</strong> {selectedThread.customerPhone}
-                        </>
-                      )}
-                    </p>
-                  </div>
-                  <span className={`form-badge-pill ${getFormBadgeClass(selectedThread.formType)}`} style={{ marginLeft: 'auto' }}>
-                    {getFormLabel(selectedThread.formType)}
-                  </span>
-                </div>
-
-                {/* Messages Log Stack (Gmail Thread style) */}
-                <div className="messages-scroller" style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                  {selectedThread.emails.map((email, idx) => {
-                    const isExpanded = expandedEmailId === email.id;
-                    const isAdminSender = email.type === 'sent';
-                    const cachedDetail = emailDetailsCache[email.id];
-                    const displayHtml = cachedDetail?.html || email.html || '';
-                    const displayText = cachedDetail?.text || email.text || '';
-                    const isFetching = detailLoadingId === email.id;
-
-                    return (
-                      <div 
-                        key={email.id} 
-                        style={{
-                          borderBottom: idx < selectedThread.emails.length - 1 ? '1px solid var(--glass-border)' : 'none',
-                          paddingBottom: '1.5rem',
-                          textAlign: 'left'
-                        }}
-                      >
-                        {/* Clean Header */}
-                        <div 
-                          onClick={() => loadEmailDetails(email)}
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            cursor: 'pointer',
-                            paddingBottom: isExpanded ? '0.75rem' : '0'
-                          }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <div className="customer-avatar" style={{ width: '32px', height: '32px' }}>
-                              <User size={16} />
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
-                              <span style={{ color: 'var(--text-light)', fontWeight: 'bold', fontSize: '0.9rem' }}>
-                                {isAdminSender ? 'Easyodtah Podpora (info@easyodtah.cz)' : email.from}
-                              </span>
-                              {!isExpanded && (
-                                <span style={{ color: 'var(--text-main)', fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '300px' }}>
-                                  {displayText ? displayText.substring(0, 80) + '...' : 'Kliknutím rozbalíte / Click to expand'}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-main)' }}>
-                              {new Date(email.createdAt).toLocaleString()}
-                            </span>
-                            {isFetching ? (
-                              <RefreshCw size={14} className="spin" style={{ color: 'var(--secondary-color)' }} />
-                            ) : isExpanded ? (
-                              <ChevronUp size={16} style={{ color: 'var(--text-main)' }} />
-                            ) : (
-                              <ChevronDown size={16} style={{ color: 'var(--text-main)' }} />
-                            )}
-                          </div>
+                {activeTab === 'forms' ? (
+                  /* Custom Beautiful Form Submission UI */
+                  <div className="form-submission-detail-pane" style={{ flex: 1, overflowY: 'auto', padding: '2rem', textAlign: 'left' }}>
+                    
+                    {/* Header Row */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '2rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1.5rem' }}>
+                      <div>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginBottom: '0.5rem' }}>
+                          <span className={`form-badge-pill ${getFormBadgeClass(selectedThread.formType)}`}>
+                            {getFormLabel(selectedThread.formType)}
+                          </span>
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-main)' }}>
+                            ID: {selectedThread.emails[0].messageId || selectedThread.emails[0].id}
+                          </span>
                         </div>
+                        <h2 style={{ fontSize: '1.75rem', color: 'var(--text-light)', margin: 0 }}>
+                          {selectedThread.subject}
+                        </h2>
+                      </div>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <Clock size={14} /> {new Date(selectedThread.emails[0].createdAt).toLocaleString()}
+                      </span>
+                    </div>
 
-                        {/* Expanded Content Body (No borders/background boxes) */}
-                        {isExpanded && (
-                          <div style={{ padding: '0.5rem 0 0 2.75rem' }}>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-main)', marginBottom: '0.75rem' }}>
-                              Komu: {Array.isArray(email.to) ? email.to.join(', ') : email.to}
+                    {/* Structured Grid info cards */}
+                    <div className="form-info-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem', marginBottom: '2rem' }}>
+                      <div className="form-info-card" style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-main)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px', display: 'block', marginBottom: '0.4rem' }}>
+                          Celé jméno / Name
+                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-light)', fontWeight: 'bold', fontSize: '1.05rem' }}>
+                          <User size={16} style={{ color: 'var(--secondary-color)' }} />
+                          {selectedThread.customerName}
+                        </div>
+                      </div>
+
+                      <div className="form-info-card" style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-main)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px', display: 'block', marginBottom: '0.4rem' }}>
+                          E-mail / Email Address
+                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <Mail size={16} style={{ color: 'var(--secondary-color)' }} />
+                          <a href={`mailto:${selectedThread.customerEmail}`} style={{ color: 'var(--secondary-color)', fontWeight: 'bold', textDecoration: 'none', fontSize: '1.05rem' }}>
+                            {selectedThread.customerEmail}
+                          </a>
+                        </div>
+                      </div>
+
+                      <div className="form-info-card" style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.25rem' }}>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-main)', textTransform: 'uppercase', fontWeight: 600, letterSpacing: '0.5px', display: 'block', marginBottom: '0.4rem' }}>
+                          Telefon / Phone Number
+                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <Phone size={16} style={{ color: 'var(--secondary-color)' }} />
+                          {selectedThread.customerPhone ? (
+                            <a href={`tel:${selectedThread.customerPhone}`} style={{ color: 'var(--text-light)', fontWeight: 'bold', textDecoration: 'none', fontSize: '1.05rem' }}>
+                              {selectedThread.customerPhone}
+                            </a>
+                          ) : (
+                            <span style={{ color: 'var(--text-main)', fontStyle: 'italic', fontSize: '0.95rem' }}>Neuvedeno / Not provided</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Customer Message Box */}
+                    <div style={{ marginBottom: '2.5rem' }}>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-light)', fontWeight: 'bold', display: 'block', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        Zpráva zákazníka / Customer Message
+                      </span>
+                      <div style={{ background: 'rgba(0, 0, 0, 0.15)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '1.5rem', minHeight: '120px', whiteSpace: 'pre-wrap', color: 'var(--text-light)', fontSize: '1rem', lineHeight: '1.6' }}>
+                        {getFormMessageBody(selectedThread.emails[0].text || emailDetailsCache[selectedThread.emails[0].id]?.text)}
+                      </div>
+                    </div>
+
+                    {/* Conversation History (Slice original lead out) */}
+                    {selectedThread.emails.length > 1 && (
+                      <div style={{ marginTop: '2.5rem', borderTop: '1px solid var(--glass-border)', paddingTop: '2rem' }}>
+                        <h4 style={{ color: 'var(--text-light)', fontSize: '1.1rem', marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <CornerUpLeft size={16} style={{ color: 'var(--secondary-color)' }} />
+                          <span>Historie odpovědí / Conversation Replies</span>
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                          {selectedThread.emails.slice(1).map((email) => {
+                            const isAdminSender = email.type === 'sent';
+                            return (
+                              <div key={email.id} style={{ borderLeft: `3px solid ${isAdminSender ? 'var(--secondary-color)' : 'var(--text-main)'}`, paddingLeft: '1.25rem', marginBottom: '0.5rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: 'var(--text-main)', marginBottom: '0.4rem' }}>
+                                  <strong style={{ color: 'var(--text-light)' }}>
+                                    {isAdminSender ? 'Easyodtah Podpora (info@easyodtah.cz)' : email.from}
+                                  </strong>
+                                  <span>{new Date(email.createdAt).toLocaleString()}</span>
+                                </div>
+                                <div style={{ whiteSpace: 'pre-wrap', color: 'var(--text-light)', fontSize: '0.95rem', lineHeight: '1.5', background: 'rgba(255,255,255,0.01)', padding: '0.75rem', borderRadius: '8px' }}>
+                                  {email.text || 'Bez textu / No content'}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Standard Chronological Email Thread Layout */
+                  <>
+                    {/* Thread Header Info Card */}
+                    <div className="chat-header-info">
+                      <div className="customer-avatar">
+                        <User size={20} />
+                      </div>
+                      <div className="header-meta">
+                        <h3>{selectedThread.customerName}</h3>
+                        <p style={{ color: 'var(--text-main)', fontSize: '0.85rem' }}>
+                          <strong>Email:</strong> {selectedThread.customerEmail}
+                          {selectedThread.customerPhone && (
+                            <>
+                              <span style={{ margin: '0 0.5rem' }}>|</span>
+                              <strong>Telefon:</strong> {selectedThread.customerPhone}
+                            </>
+                          )}
+                        </p>
+                      </div>
+                      <span className={`form-badge-pill ${getFormBadgeClass(selectedThread.formType)}`} style={{ marginLeft: 'auto' }}>
+                        {getFormLabel(selectedThread.formType)}
+                      </span>
+                    </div>
+
+                    {/* Messages Log Stack (Gmail Thread style) */}
+                    <div className="messages-scroller" style={{ flex: 1, overflowY: 'auto', padding: '1.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                      {selectedThread.emails.map((email, idx) => {
+                        const isExpanded = expandedEmailId === email.id;
+                        const isAdminSender = email.type === 'sent';
+                        const cachedDetail = emailDetailsCache[email.id];
+                        const displayHtml = cachedDetail?.html || email.html || '';
+                        const displayText = cachedDetail?.text || email.text || '';
+                        const isFetching = detailLoadingId === email.id;
+
+                        return (
+                          <div 
+                            key={email.id} 
+                            style={{
+                              borderBottom: idx < selectedThread.emails.length - 1 ? '1px solid var(--glass-border)' : 'none',
+                              paddingBottom: '1.5rem',
+                              textAlign: 'left'
+                            }}
+                          >
+                            {/* Clean Header */}
+                            <div 
+                              onClick={() => loadEmailDetails(email)}
+                              style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                cursor: 'pointer',
+                                paddingBottom: isExpanded ? '0.75rem' : '0'
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <div className="customer-avatar" style={{ width: '32px', height: '32px' }}>
+                                  <User size={16} />
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                                  <span style={{ color: 'var(--text-light)', fontWeight: 'bold', fontSize: '0.9rem' }}>
+                                    {isAdminSender ? 'Easyodtah Podpora (info@easyodtah.cz)' : email.from}
+                                  </span>
+                                  {!isExpanded && (
+                                    <span style={{ color: 'var(--text-main)', fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '300px' }}>
+                                      {displayText ? displayText.substring(0, 80) + '...' : 'Kliknutím rozbalíte / Click to expand'}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                              
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-main)' }}>
+                                  {new Date(email.createdAt).toLocaleString()}
+                                </span>
+                                {isFetching ? (
+                                  <RefreshCw size={14} className="spin" style={{ color: 'var(--secondary-color)' }} />
+                                ) : isExpanded ? (
+                                  <ChevronUp size={16} style={{ color: 'var(--text-main)' }} />
+                                ) : (
+                                  <ChevronDown size={16} style={{ color: 'var(--text-main)' }} />
+                                )}
+                              </div>
                             </div>
-                            {displayHtml ? (
-                              <iframe 
-                                srcDoc={displayHtml} 
-                                title={`EmailBody-${email.id}`}
-                                style={{ width: '100%', height: '320px', border: 'none', background: 'transparent' }}
-                              />
-                            ) : (
-                              <div style={{ whiteSpace: 'pre-wrap', color: 'var(--text-light)', fontSize: '0.95rem', lineHeight: '1.6' }}>
-                                {displayText || 'Bez obsahu / No content'}
+
+                            {/* Expanded Content Body (No borders/background boxes) */}
+                            {isExpanded && (
+                              <div style={{ padding: '0.5rem 0 0 2.75rem' }}>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-main)', marginBottom: '0.75rem' }}>
+                                  Komu: {Array.isArray(email.to) ? email.to.join(', ') : email.to}
+                                </div>
+                                {displayHtml ? (
+                                  <iframe 
+                                    srcDoc={displayHtml} 
+                                    title={`EmailBody-${email.id}`}
+                                    style={{ width: '100%', height: '320px', border: 'none', background: 'transparent' }}
+                                  />
+                                ) : (
+                                  <div style={{ whiteSpace: 'pre-wrap', color: 'var(--text-light)', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                                    {displayText || 'Bez obsahu / No content'}
+                                  </div>
+                                )}
                               </div>
                             )}
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                  <div ref={chatEndRef} />
-                </div>
+                        );
+                      })}
+                      <div ref={chatEndRef} />
+                    </div>
+                  </>
+                )}
 
                 {/* Reply Form Editor Area */}
                 <div className="reply-editor-box" style={{ borderTop: '1px solid var(--glass-border)', padding: '1.5rem', background: 'rgba(255,255,255,0.01)' }}>
